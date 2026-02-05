@@ -79,11 +79,14 @@ export function HomeContentManager({ token }) {
         },
         hero: {
           titulo: data.hero?.titulo || "",
-          texto: Array.isArray(data.hero?.texto) ? data.hero.texto.join("\n\n") : "",
+          // CORREÇÃO: Lê 'subtitulo' ou 'texto' para compatibilidade
+          texto: Array.isArray(data.hero?.subtitulo) ? data.hero.subtitulo.join("\n\n") : (data.hero?.subtitulo || ""),
           frase_impacto: data.hero?.frase_impacto || "",
-          cta_texto: data.hero?.cta_texto || "",
+          // CORREÇÃO: Mapeia botao_texto
+          cta_texto: data.hero?.botao_texto || "",
           cta_link: data.hero?.cta_link || "",
-          imagem: data.hero?.imagem || "",
+          // CORREÇÃO: Mapeia background_url
+          imagem: data.hero?.background_url || "",
         },
         sobre: {
           titulo: data.sobre?.titulo || "",
@@ -113,7 +116,6 @@ export function HomeContentManager({ token }) {
   async function uploadImage(file) {
     const form = new FormData()
     form.append("file", file)
-    // CORREÇÃO: Adicionado authHeader para permitir upload no servidor
     const res = await axios.post(`${API}/upload`, form, authHeader)
     return res.data.url
   }
@@ -234,15 +236,17 @@ export function HomeContentManager({ token }) {
     try {
       setSaving(true)
 
+      // AQUI ESTÁ O AJUSTE DE CHAVES PARA O SITE RECONHECER
       const payload = {
         slug: "home",
         branding: home.branding,
         hero: {
-          ...home.hero,
-          texto: home.hero.texto
-            .split("\n")
-            .map(t => t.trim())
-            .filter(Boolean),
+          titulo: home.hero.titulo,
+          subtitulo: home.hero.texto, // Mapeado de 'texto' para 'subtitulo'
+          frase_impacto: home.hero.frase_impacto,
+          botao_texto: home.hero.cta_texto, // Mapeado de 'cta_texto' para 'botao_texto'
+          cta_link: home.hero.cta_link,
+          background_url: home.hero.imagem, // Mapeado de 'imagem' para 'background_url'
         },
         sobre: {
           ...home.sobre,
@@ -260,10 +264,10 @@ export function HomeContentManager({ token }) {
       }
 
       await axios.put(`${API}/home-content`, payload, authHeader)
-      toast.success("Pagina principal atualizada com sucesso")
+      toast.success("Página principal atualizada com sucesso")
     } catch (err) {
       console.error(err)
-      toast.error("Erro ao salvar conteudo")
+      toast.error("Erro ao salvar conteúdo")
     } finally {
       setSaving(false)
     }
@@ -287,8 +291,8 @@ export function HomeContentManager({ token }) {
             <FileText className="w-6 h-6 text-amber-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Gerenciar Pagina Inicial</h1>
-            <p className="text-zinc-500 text-sm">Edite o conteudo da sua home page</p>
+            <h1 className="text-2xl font-bold text-white">Gerenciar Página Inicial</h1>
+            <p className="text-zinc-500 text-sm">Edite o conteúdo da sua home page</p>
           </div>
         </div>
         <Button 
@@ -339,16 +343,16 @@ export function HomeContentManager({ token }) {
       </Section>
 
       {/* HERO */}
-      <Section icon={Sparkles} title="Hero - Secao Principal">
+      <Section icon={Sparkles} title="Hero - Seção Principal">
         <StyledInput
-          label="Titulo Principal"
+          label="Título Principal"
           value={home.hero.titulo}
           onChange={e => setHome(p => ({ ...p, hero: { ...p.hero, titulo: e.target.value } }))}
           placeholder="Central Joias"
         />
         
         <StyledTextarea
-          label="Textos (separe paragrafos com linha em branco)"
+          label="Subtítulo/Texto (aparece abaixo do título)"
           rows={6}
           value={home.hero.texto}
           onChange={e => setHome(p => ({ ...p, hero: { ...p.hero, texto: e.target.value } }))}
@@ -359,18 +363,18 @@ export function HomeContentManager({ token }) {
           label="Frase de Impacto"
           value={home.hero.frase_impacto}
           onChange={e => setHome(p => ({ ...p, hero: { ...p.hero, frase_impacto: e.target.value } }))}
-          placeholder="Onde o luxo e a elegancia se encontram"
+          placeholder="Onde o luxo e a elegância se encontram"
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <StyledInput
-            label="Texto do Botao CTA"
+            label="Texto do Botão CTA"
             value={home.hero.cta_texto}
             onChange={e => setHome(p => ({ ...p, hero: { ...p.hero, cta_texto: e.target.value } }))}
-            placeholder="Conheca nosso catalogo"
+            placeholder="Conheça nosso catálogo"
           />
           <StyledInput
-            label="Link do Botao CTA"
+            label="Link do Botão CTA"
             value={home.hero.cta_link}
             onChange={e => setHome(p => ({ ...p, hero: { ...p.hero, cta_link: e.target.value } }))}
             placeholder="/catalogo"
@@ -391,23 +395,23 @@ export function HomeContentManager({ token }) {
           )}
           <label className="flex-1 border-2 border-dashed border-zinc-700 rounded-xl p-4 flex items-center justify-center gap-3 cursor-pointer hover:border-amber-500/50 hover:bg-amber-500/5 transition-all group">
             {uploading ? <Loader2 className="w-5 h-5 text-amber-500 animate-spin" /> : <ImageIcon className="w-5 h-5 text-zinc-500 group-hover:text-amber-500" />}
-            <span className="text-xs text-zinc-500 group-hover:text-amber-400 font-bold uppercase">Imagem do Hero (opcional)</span>
+            <span className="text-xs text-zinc-500 group-hover:text-amber-400 font-bold uppercase">Imagem do Banner (Background)</span>
             <input type="file" className="hidden" accept="image/*" onChange={handleHeroImageChange} disabled={uploading} />
           </label>
         </div>
       </Section>
 
       {/* SOBRE */}
-      <Section icon={Gem} title="Secao Sobre">
+      <Section icon={Gem} title="Seção Sobre">
         <StyledInput
-          label="Titulo"
+          label="Título"
           value={home.sobre.titulo}
           onChange={e => setHome(p => ({ ...p, sobre: { ...p.sobre, titulo: e.target.value } }))}
-          placeholder="Nossa Historia"
+          placeholder="Nossa História"
         />
 
         <StyledTextarea
-          label="Textos (separe paragrafos com linha em branco)"
+          label="Textos (separe parágrafos com linha em branco)"
           rows={5}
           value={home.sobre.textos}
           onChange={e => setHome(p => ({ ...p, sobre: { ...p.sobre, textos: e.target.value } }))}
@@ -418,7 +422,7 @@ export function HomeContentManager({ token }) {
           rows={4}
           value={home.sobre.mensagens}
           onChange={e => setHome(p => ({ ...p, sobre: { ...p.sobre, mensagens: e.target.value } }))}
-          placeholder="Mais de 15 anos no mercado&#10;Joias artesanais feitas a mao&#10;Referencia em Niqueiandia"
+          placeholder="Mais de 15 anos no mercado&#10;Joias artesanais feitas a mão&#10;Referência em Niquelândia"
         />
 
         <div className="space-y-2">
@@ -459,19 +463,19 @@ export function HomeContentManager({ token }) {
       </Section>
 
       {/* CONTATO */}
-      <Section icon={Phone} title="Secao Contato">
+      <Section icon={Phone} title="Seção Contato">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <StyledInput
-            label="Titulo"
+            label="Título"
             value={home.contato.titulo}
             onChange={e => setHome(p => ({ ...p, contato: { ...p.contato, titulo: e.target.value } }))}
             placeholder="Contato"
           />
           <StyledInput
-            label="Subtitulo"
+            label="Subtítulo"
             value={home.contato.subtitulo}
             onChange={e => setHome(p => ({ ...p, contato: { ...p.contato, subtitulo: e.target.value } }))}
-            placeholder="Nossas lojas fisicas e atendimento direto"
+            placeholder="Nossas lojas físicas e atendimento direto"
           />
         </div>
 
@@ -502,7 +506,7 @@ export function HomeContentManager({ token }) {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Input
-                  placeholder="Nome (ex: Loja Niqueiandia)"
+                  placeholder="Nome (ex: Loja Niquelândia)"
                   className="bg-zinc-900 border-zinc-700 text-white h-10"
                   value={loja.nome}
                   onChange={e => updateContatoLoja(i, "nome", e.target.value)}
@@ -515,13 +519,13 @@ export function HomeContentManager({ token }) {
                 />
               </div>
               <Input
-                placeholder="Titulo do Card"
+                placeholder="Título do Card"
                 className="bg-zinc-900 border-zinc-700 text-white h-10"
                 value={loja.titulo_card}
                 onChange={e => updateContatoLoja(i, "titulo_card", e.target.value)}
               />
               <Textarea
-                placeholder="Endereco completo"
+                placeholder="Endereço completo"
                 className="bg-zinc-900 border-zinc-700 text-white"
                 rows={2}
                 value={loja.endereco}
@@ -535,7 +539,7 @@ export function HomeContentManager({ token }) {
                   onChange={e => updateContatoLoja(i, "whatsapp_url", e.target.value)}
                 />
                 <Input
-                  placeholder="Horario"
+                  placeholder="Horário"
                   className="bg-zinc-900 border-zinc-700 text-white h-10"
                   value={loja.horario}
                   onChange={e => updateContatoLoja(i, "horario", e.target.value)}
@@ -553,7 +557,7 @@ export function HomeContentManager({ token }) {
           rows={3}
           value={home.footer.institucional}
           onChange={e => setHome(p => ({ ...p, footer: { ...p.footer, institucional: e.target.value } }))}
-          placeholder="Ha mais de 15 anos oferecendo joias..."
+          placeholder="Há mais de 15 anos oferecendo joias..."
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -567,7 +571,7 @@ export function HomeContentManager({ token }) {
             label="Texto do Selo"
             value={home.footer.selo_texto}
             onChange={e => setHome(p => ({ ...p, footer: { ...p.footer, selo_texto: e.target.value } }))}
-            placeholder="Loja Premium - Referencia na Cidade"
+            placeholder="Loja Premium - Referência na Cidade"
           />
         </div>
 
@@ -597,7 +601,7 @@ export function HomeContentManager({ token }) {
                 onChange={e => updateFooterLoja(i, "nome", e.target.value)}
               />
               <Textarea
-                placeholder="Endereco"
+                placeholder="Endereço"
                 className="bg-zinc-900 border-zinc-700 text-white"
                 rows={2}
                 value={loja.endereco}
@@ -618,7 +622,7 @@ export function HomeContentManager({ token }) {
                 />
               </div>
               <Input
-                placeholder="Horario de funcionamento"
+                placeholder="Horário de funcionamento"
                 className="bg-zinc-900 border-zinc-700 text-white h-10"
                 value={loja.horario}
                 onChange={e => updateFooterLoja(i, "horario", e.target.value)}
@@ -630,7 +634,7 @@ export function HomeContentManager({ token }) {
         {/* Certificados */}
         <div className="space-y-2 mt-6 pt-4 border-t border-zinc-700">
           <Label className="text-zinc-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-            <Award className="w-4 h-4 text-amber-400" /> Certificados e Premiacoes
+            <Award className="w-4 h-4 text-amber-400" /> Certificados e Premiações
           </Label>
           <div className="flex flex-wrap gap-3">
             {(home.footer.certificados || []).map((c, i) => (
@@ -675,7 +679,7 @@ export function HomeContentManager({ token }) {
           className="bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold px-6 py-3 rounded-xl shadow-2xl shadow-amber-500/30"
         >
           {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Save className="w-5 h-5 mr-2" />}
-          Salvar Alteracoes
+          Salvar Alterações
         </Button>
       </div>
     </div>
