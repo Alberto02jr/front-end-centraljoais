@@ -40,10 +40,15 @@ const Layout = () => {
   useEffect(() => {
     async function loadHomeContent() {
       try {
-        const res = await axios.get(`${API}/home-content`)
+        const url = `${API}/home-content`
+        console.log("[v0] Buscando homeContent de:", url)
+        const res = await axios.get(url)
+        console.log("[v0] homeContent.hero:", JSON.stringify(res.data?.hero))
+        console.log("[v0] homeContent.sobre:", JSON.stringify(res.data?.sobre))
+        console.log("[v0] homeContent.branding:", JSON.stringify(res.data?.branding))
         setHomeContent(res.data)
       } catch (err) {
-        console.error('Erro ao carregar home content', err)
+        console.error('[v0] ERRO ao carregar home content:', err.message, err.response?.status)
       }
     }
 
