@@ -10,7 +10,30 @@ const BADGES = [
 export const Hero = ({ homeContent }: { homeContent: any }) => {
   const hero = homeContent?.hero;
 
-  if (!hero) return null;
+  // Fallback: mostra um skeleton/loading elegante enquanto os dados carregam
+  if (!hero) {
+    return (
+      <section className="min-h-screen flex items-center justify-center bg-zinc-950 px-6 pt-28 pb-16 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent pointer-events-none" />
+        <div className="max-w-5xl text-center relative z-10">
+          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-full px-5 py-2.5 mb-8">
+            <Gem className="w-4 h-4 text-amber-400" />
+            <span className="text-amber-400 text-sm font-medium tracking-wide">Joalheria Artesanal</span>
+          </div>
+          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl text-white tracking-wide mb-6">
+            <span className="block">Central</span>
+            <span className="text-amber-400">Joias</span>
+          </h1>
+          <div className="flex items-center justify-center gap-4 mb-10">
+            <div className="w-16 h-px bg-gradient-to-r from-transparent to-amber-500/50" />
+            <Gem className="w-5 h-5 text-amber-500 animate-pulse" />
+            <div className="w-16 h-px bg-gradient-to-l from-transparent to-amber-500/50" />
+          </div>
+          <p className="text-zinc-500 text-lg animate-pulse">Carregando...</p>
+        </div>
+      </section>
+    );
+  }
 
   const titulo = hero.titulo || "";
   const primeiraPalavra = titulo.split(" ")[0] || "";
