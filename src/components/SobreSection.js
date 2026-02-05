@@ -20,7 +20,7 @@ const DESTAQUES = [
 ];
 
 export const SobreSection = ({ homeContent }) => {
-  // 🔒 Hooks SEMPRE no topo
+  // ✅ HOOKS SEMPRE PRIMEIRO
   const [fotoAtual, setFotoAtual] = useState(0);
   const [msgAtual, setMsgAtual] = useState(0);
   const [zoom, setZoom] = useState(false);
@@ -35,29 +35,29 @@ export const SobreSection = ({ homeContent }) => {
     if (!fotos.length || !mensagens.length) return;
 
     const interval = setInterval(() => {
-      setFotoAtual(prev => (prev + 1) % fotos.length);
-      setMsgAtual(prev => (prev + 1) % mensagens.length);
+      setFotoAtual((prev) => (prev + 1) % fotos.length);
+      setMsgAtual((prev) => (prev + 1) % mensagens.length);
     }, 2500);
 
     return () => clearInterval(interval);
   }, [fotos.length, mensagens.length]);
 
-  // 👇 Condição APÓS hooks
+  // ✅ CONDIÇÃO SÓ DEPOIS DOS HOOKS
   if (!sobre) return null;
 
   const nextFoto = () => {
     if (!fotos.length) return;
-    setFotoAtual(prev => (prev + 1) % fotos.length);
+    setFotoAtual((prev) => (prev + 1) % fotos.length);
     if (mensagens.length) {
-      setMsgAtual(prev => (prev + 1) % mensagens.length);
+      setMsgAtual((prev) => (prev + 1) % mensagens.length);
     }
   };
 
   const prevFoto = () => {
     if (!fotos.length) return;
-    setFotoAtual(prev => (prev - 1 + fotos.length) % fotos.length);
+    setFotoAtual((prev) => (prev - 1 + fotos.length) % fotos.length);
     if (mensagens.length) {
-      setMsgAtual(prev => (prev - 1 + mensagens.length) % mensagens.length);
+      setMsgAtual((prev) => (prev - 1 + mensagens.length) % mensagens.length);
     }
   };
 
@@ -86,7 +86,6 @@ export const SobreSection = ({ homeContent }) => {
 
           {fotos.length > 0 && (
             <div className="relative order-1 lg:order-2">
-
               {mensagens.length > 0 && (
                 <div className="absolute -top-8 left-0 right-0 z-20">
                   <div className="bg-zinc-900/90 backdrop-blur border border-amber-500/30 rounded-xl px-6 py-3 mx-auto w-fit">
@@ -105,17 +104,11 @@ export const SobreSection = ({ homeContent }) => {
                   className="w-full h-full object-cover cursor-zoom-in"
                 />
 
-                <button
-                  onClick={prevFoto}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-zinc-900/80 border border-zinc-700 p-2.5 rounded-full text-white"
-                >
+                <button onClick={prevFoto} className="absolute left-3 top-1/2 -translate-y-1/2 bg-zinc-900/80 border border-zinc-700 p-2.5 rounded-full text-white">
                   <ChevronLeft className="w-5 h-5" />
                 </button>
 
-                <button
-                  onClick={nextFoto}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-zinc-900/80 border border-zinc-700 p-2.5 rounded-full text-white"
-                >
+                <button onClick={nextFoto} className="absolute right-3 top-1/2 -translate-y-1/2 bg-zinc-900/80 border border-zinc-700 p-2.5 rounded-full text-white">
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
@@ -126,7 +119,7 @@ export const SobreSection = ({ homeContent }) => {
             <div className="order-2 lg:order-1 space-y-6">
               {textos.map((p, i) => (
                 <div key={i} className="flex gap-4">
-                  <div className="flex-shrink-0 w-1 bg-gradient-to-b from-amber-500 to-amber-600/30 rounded-full" />
+                  <div className="w-1 bg-gradient-to-b from-amber-500 to-amber-600/30 rounded-full" />
                   <p className="text-zinc-300 leading-relaxed">{p}</p>
                 </div>
               ))}
@@ -140,16 +133,8 @@ export const SobreSection = ({ homeContent }) => {
           className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
           onClick={() => setZoom(false)}
         >
-          <img
-            src={fotos[fotoAtual]}
-            alt=""
-            className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
-            onClick={e => e.stopPropagation()}
-          />
-          <button
-            onClick={() => setZoom(false)}
-            className="absolute top-4 right-4 bg-zinc-800 p-2 rounded-full text-white"
-          >
+          <img src={fotos[fotoAtual]} alt="" className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg" />
+          <button onClick={() => setZoom(false)} className="absolute top-4 right-4 bg-zinc-800 p-2 rounded-full text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
