@@ -58,10 +58,20 @@ function StyledTextarea({ label, ...props }) {
   )
 }
 
+// Estrutura padrao para quando nao ha dados no banco
+const DEFAULT_HOME = {
+  branding: { nome_loja: "", slogan: "", logo_url: "" },
+  hero: { titulo: "", texto: "", frase_impacto: "", cta_texto: "", cta_link: "", imagem: "" },
+  sobre: { titulo: "", textos: "", mensagens: "", fotos: [] },
+  contato: { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
+  footer: { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] },
+}
+
 export function HomeContentManager({ token }) {
   const [home, setHome] = useState(null)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [loadError, setLoadError] = useState(false)
 
   const authHeader = {
     headers: { Authorization: `Bearer ${token}` },
@@ -72,6 +82,7 @@ export function HomeContentManager({ token }) {
   }, [])
 
   async function loadHome() {
+    setLoadError(false)
     try {
       const res = await axios.get(`${API}/home-content`)
 
@@ -121,6 +132,7 @@ export function HomeContentManager({ token }) {
       })
     } catch (err) {
       console.error(err)
+      setLoadError(true)
       toast.error("Erro ao carregar conteudo da Home")
     }
   }
@@ -286,6 +298,31 @@ export function HomeContentManager({ token }) {
   }
 
   if (!home) {
+    // Se deu erro ao carregar, mostra opcoes ao inves de ficar na tela preta
+    if (loadError) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <p className="text-red-400 font-bold">Erro ao carregar conteudo da Home</p>
+          <p className="text-zinc-500 text-sm text-center max-w-md">
+            Nao foi possivel conectar ao servidor. Verifique se o backend esta rodando e se a variavel REACT_APP_API_URL esta configurada corretamente.
+          </p>
+          <p className="text-zinc-600 text-xs">API: {API || "NAO CONFIGURADA"}</p>
+          <div className="flex gap-3 mt-2">
+            <Button onClick={loadHome} className="bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold">
+              Tentar Novamente
+            </Button>
+            <Button 
+              onClick={() => setHome(DEFAULT_HOME)} 
+              variant="outline" 
+              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+            >
+              Iniciar do Zero
+            </Button>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
