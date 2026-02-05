@@ -1,28 +1,41 @@
 import { Link } from "react-router-dom";
 import { Gem, ShieldCheck, Award, Sparkles, ChevronDown } from "lucide-react";
 
+/* ===== CONTEUDO INICIAL (EXIBIDO ATE VOCE CONFIGURAR NO ADMIN) ===== */
+const CONTEUDO_INICIAL = {
+  titulo: "Central Joias",
+  texto: [
+    "Na Central Joias, trabalhamos com prata certificada 950, assegurando autenticidade, qualidade e acabamento de alto padrao em cada peca.",
+    "Atuamos com semijoias cuidadosamente selecionadas, todas com 1 ano de garantia, alem de realizarmos manutencao, solda e conserto de joias. Tambem confeccionamos e comercializamos aliancas, pecas exclusivas e moedas antigas.",
+    "Nosso principal diferencial esta nas aliancas confeccionadas a partir de moeda antiga, que recebem forro interno em prata e aco inox. Essa combinacao garante maior durabilidade, reduz a oxidacao e oferece mais conforto para a pele.",
+    "Produzimos ainda aliancas de ouro 750 (18k) sob encomenda e aliancas de prata personalizadas, unindo resistencia, elegancia e precos acessiveis."
+  ],
+  frase_impacto: "Onde o luxo e a elegancia se encontram",
+  cta_texto: "Conheca nosso catalogo",
+  cta_link: "/catalogo",
+};
+
 const BADGES = [
   { icon: ShieldCheck, label: "Garantia Vitalicia" },
   { icon: Award, label: "Prata 950" },
   { icon: Sparkles, label: "Feito a Mao" },
 ];
 
-export const Hero = ({ homeContent }: { homeContent: any }) => {
+export const Hero = ({ homeContent }) => {
   const hero = homeContent?.hero;
 
-  if (!hero) return null;
-
-  const titulo = hero.titulo || "";
-  const primeiraPalavra = titulo.split(" ")[0] || "";
-  const restante = titulo.split(" ").slice(1).join(" ") || "";
+  const textos =
+    hero?.texto && hero.texto.length > 0
+      ? hero.texto
+      : CONTEUDO_INICIAL.texto;
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-zinc-950 px-6 pt-28 pb-16 relative overflow-hidden">
-
+      
       {/* Background decorativo */}
       <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-
+      
       {/* Linhas decorativas */}
       <div className="absolute top-32 left-8 w-px h-32 bg-gradient-to-b from-amber-500/50 to-transparent hidden lg:block" />
       <div className="absolute top-32 right-8 w-px h-32 bg-gradient-to-b from-amber-500/50 to-transparent hidden lg:block" />
@@ -36,12 +49,10 @@ export const Hero = ({ homeContent }: { homeContent: any }) => {
         </div>
 
         {/* TITULO */}
-        {titulo && (
-          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl text-white tracking-wide mb-6">
-            <span className="block">{primeiraPalavra}</span>
-            {restante && <span className="text-amber-400">{restante}</span>}
-          </h1>
-        )}
+        <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl text-white tracking-wide mb-6">
+          <span className="block">{(hero?.titulo || CONTEUDO_INICIAL.titulo).split(' ')[0]}</span>
+          <span className="text-amber-400">{(hero?.titulo || CONTEUDO_INICIAL.titulo).split(' ').slice(1).join(' ')}</span>
+        </h1>
 
         {/* Linha decorativa */}
         <div className="flex items-center justify-center gap-4 mb-10">
@@ -51,13 +62,11 @@ export const Hero = ({ homeContent }: { homeContent: any }) => {
         </div>
 
         {/* TEXTO PRINCIPAL */}
-        {hero.texto && hero.texto.length > 0 && (
-          <div className="text-zinc-400 text-base md:text-lg leading-relaxed mb-10 space-y-4 max-w-3xl mx-auto">
-            {hero.texto.slice(0, 2).map((p: string, i: number) => (
-              <p key={i} className={i === 0 ? "text-zinc-300" : ""}>{p}</p>
-            ))}
-          </div>
-        )}
+        <div className="text-zinc-400 text-base md:text-lg leading-relaxed mb-10 space-y-4 max-w-3xl mx-auto">
+          {textos.slice(0, 2).map((p, i) => (
+            <p key={i} className={i === 0 ? "text-zinc-300" : ""}>{p}</p>
+          ))}
+        </div>
 
         {/* Trust badges */}
         <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
@@ -70,31 +79,27 @@ export const Hero = ({ homeContent }: { homeContent: any }) => {
         </div>
 
         {/* FRASE DE IMPACTO */}
-        {hero.frase_impacto && (
-          <div className="relative mb-12">
-            <p className="font-serif text-2xl md:text-3xl lg:text-4xl text-amber-400 leading-relaxed">
-              &ldquo;{hero.frase_impacto}&rdquo;
-            </p>
-          </div>
-        )}
+        <div className="relative mb-12">
+          <p className="font-serif text-2xl md:text-3xl lg:text-4xl text-amber-400 leading-relaxed">
+            "{hero?.frase_impacto || CONTEUDO_INICIAL.frase_impacto}"
+          </p>
+        </div>
 
         {/* BOTOES CTA */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          {hero.cta_texto && hero.cta_link && (
-            <Link
-              to={hero.cta_link}
-              className="inline-flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold px-8 py-4 rounded-xl uppercase tracking-wider text-sm hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20"
-            >
-              <Gem className="w-5 h-5" />
-              {hero.cta_texto}
-            </Link>
-          )}
-          <a
-            href="#sobre"
-            className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-700 text-white font-bold px-8 py-4 rounded-xl uppercase tracking-wider text-sm hover:bg-zinc-800 hover:border-zinc-600 transition-all"
+          <Link
+            to={hero?.cta_link || CONTEUDO_INICIAL.cta_link}
+            className="inline-flex items-center gap-2 bg-amber-500 text-zinc-900 font-bold px-8 py-4 rounded-xl uppercase tracking-wider text-sm hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20"
           >
-            Saiba Mais
-          </a>
+            <Gem className="w-5 h-5" />
+            {hero?.cta_texto || CONTEUDO_INICIAL.cta_texto}
+          </Link>
+          <a
+  href="#sobre"
+  className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-700 text-white font-bold px-8 py-4 rounded-xl uppercase tracking-wider text-sm hover:bg-zinc-800 hover:border-zinc-600 transition-all"
+>
+  Saiba Mais
+</a>
         </div>
 
         {/* Scroll indicator */}
