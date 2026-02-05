@@ -61,12 +61,11 @@ export function HomeContentManager({ token }) {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
 
-  // Memoize headers para evitar problemas em useEffects futuros
-  const authHeader = {
+  // Memoize headers
+  const authHeader = React.useMemo(() => ({
     headers: { Authorization: `Bearer ${token}` },
-  }
+  }), [token])
 
-  // Função de carregar dados isolada
   const loadHome = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/home-content`)
@@ -97,7 +96,6 @@ export function HomeContentManager({ token }) {
       })
     } catch (err) {
       console.error("Erro ao carregar API:", err)
-      // Estado inicial caso a API falhe (previne o Loader infinito)
       setHome({
         branding: { nome_loja: "", slogan: "", logo_url: "" },
         hero: { titulo: "", texto: "", frase_impacto: "", cta_texto: "", cta_link: "", imagem: "" },
@@ -105,7 +103,6 @@ export function HomeContentManager({ token }) {
         contato: { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
         footer: { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] }
       })
-      toast.error("Aviso: Iniciando com formulário vazio.")
     }
   }, [])
 
@@ -116,6 +113,7 @@ export function HomeContentManager({ token }) {
   async function uploadImage(file) {
     const form = new FormData()
     form.append("file", file)
+    // CORREÇÃO: Adicionado authHeader para permitir upload no servidor
     const res = await axios.post(`${API}/upload`, form, authHeader)
     return res.data.url
   }
@@ -155,7 +153,6 @@ export function HomeContentManager({ token }) {
     e.target.value = ""
   }
 
-  // Funcoes para gerenciar lojas do contato
   function addContatoLoja() {
     setHome(p => ({
       ...p,
@@ -195,7 +192,6 @@ export function HomeContentManager({ token }) {
     }))
   }
 
-  // Funcoes para gerenciar lojas do footer
   function addFooterLoja() {
     setHome(p => ({
       ...p,
@@ -217,7 +213,7 @@ export function HomeContentManager({ token }) {
       ...p,
       footer: {
         ...p.footer,
-        lojas: p.footer.lojas.map((loja, i) => 
+        lojas: (p.footer.lojas || []).map((loja, i) => 
           i === index ? { ...loja, [field]: value } : loja
         )
       }
@@ -448,7 +444,8 @@ export function HomeContentManager({ token }) {
                 accept="image/*"
                 disabled={uploading}
                 onChange={async e => {
-                  for (const file of Array.from(e.target.files || [])) {
+                  const files = Array.from(e.target.files || []);
+                  for (const file of files) {
                     await uploadAndSet(file, url =>
                       setHome(p => ({ ...p, sobre: { ...p.sobre, fotos: [...p.sobre.fotos, url] } }))
                     )
@@ -656,7 +653,8 @@ export function HomeContentManager({ token }) {
                 accept="image/*"
                 disabled={uploading}
                 onChange={async e => {
-                  for (const file of Array.from(e.target.files || [])) {
+                  const files = Array.from(e.target.files || []);
+                  for (const file of files) {
                     await uploadAndSet(file, url =>
                       setHome(p => ({ ...p, footer: { ...p.footer, certificados: [...(p.footer.certificados || []), url] } }))
                     )
