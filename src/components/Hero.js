@@ -35,9 +35,18 @@ export const Hero = ({ homeContent }: { homeContent: any }) => {
     );
   }
 
+  console.log("[v0] Hero recebeu homeContent.hero:", JSON.stringify(hero, null, 2));
+
   const titulo = hero.titulo || "";
   const primeiraPalavra = titulo.split(" ")[0] || "";
   const restante = titulo.split(" ").slice(1).join(" ") || "";
+
+  // Garante que texto seja SEMPRE um array, mesmo que venha como string do backend
+  const textos = Array.isArray(hero.texto)
+    ? hero.texto
+    : (typeof hero.texto === "string" && hero.texto.trim()
+      ? hero.texto.split("\n").map(t => t.trim()).filter(Boolean)
+      : []);
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-zinc-950 px-6 pt-28 pb-16 relative overflow-hidden">
@@ -74,9 +83,9 @@ export const Hero = ({ homeContent }: { homeContent: any }) => {
         </div>
 
         {/* TEXTO PRINCIPAL */}
-        {hero.texto && hero.texto.length > 0 && (
+        {textos.length > 0 && (
           <div className="text-zinc-400 text-base md:text-lg leading-relaxed mb-10 space-y-4 max-w-3xl mx-auto">
-            {hero.texto.slice(0, 2).map((p: string, i: number) => (
+            {textos.slice(0, 2).map((p: string, i: number) => (
               <p key={i} className={i === 0 ? "text-zinc-300" : ""}>{p}</p>
             ))}
           </div>
