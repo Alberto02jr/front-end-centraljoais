@@ -1,7 +1,5 @@
-// Importação do React e Hooks (useEffect para ações ao carregar e useState para guardar dados)
-import React, { useEffect, useState } from "react";
-// Axios é a biblioteca que faz as requisições para o seu servidor (backend)
-import axios from "axios";
+// Importação do React
+import React from "react";
 // Importação de ícones da biblioteca lucide-react para os diferenciais
 import { ChevronRight, Star, Diamond, Shield } from "lucide-react";
 
@@ -10,41 +8,8 @@ import { Hero } from "../components/Hero";
 import { SobreSection } from "../components/SobreSection";
 import { ContatoSection } from "../components/ContatoSection";
 
-// Definição das URLs do Backend baseadas nas variáveis de ambiente (.env)
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-export const Home = () => {
-  // Estado para guardar as informações que vêm do banco de dados (textos, imagens do banner, etc)
-  const [homeContent, setHomeContent] = useState(null);
-  // Estado para controlar se a página ainda está carregando os dados
-  const [loading, setLoading] = useState(true);
-
-  // useEffect: Executa a função de busca assim que o componente é montado na tela
-  useEffect(() => {
-    fetchHomeContent();
-  }, []);
-
-  // Função assíncrona que busca os dados da Home no Backend
-  const fetchHomeContent = async () => {
-    try {
-      // Faz uma requisição GET para a rota /home-content
-      const res = await axios.get(`${API}/home-content`);
-      // Salva os dados recebidos no estado 'homeContent'
-      setHomeContent(res.data);
-    } catch (err) {
-      // Caso dê erro (servidor offline, por exemplo), exibe no console
-      console.error("Erro ao carregar conteúdo da home", err);
-    } finally {
-      // Independentemente de dar certo ou errado, remove a tela de carregamento
-      setLoading(false);
-    }
-  };
-
-  // Se estiver carregando, mostra uma tela preta vazia (evita mostrar conteúdo incompleto)
-  if (loading) {
-    return <div className="min-h-screen bg-black" />;
-  }
+// Recebe homeContent como prop do Layout (App.js) que já busca os dados do backend
+export const Home = ({ homeContent }) => {
 
   return (
     <div className="min-h-screen" data-testid="home-page">
@@ -116,7 +81,7 @@ export const Home = () => {
       <SobreSection homeContent={homeContent} />
 
       {/* SEÇÃO DE CONTATO: Formulário ou informações de endereço/rede social */}
-      <ContatoSection />
+      <ContatoSection homeContent={homeContent} />
 
     </div>
   );

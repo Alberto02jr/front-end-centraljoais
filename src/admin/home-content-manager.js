@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import axios from "axios"
-import { Save, Upload, Store, FileText, Phone, MapPin, Clock, Award, Gem, Instagram, Plus, X, Loader2, ImageIcon } from "lucide-react"
+import { Save, Upload, Store, FileText, Phone, MapPin, Clock, Award, Gem, Instagram, Plus, X, Loader2, ImageIcon, ChevronUp, ChevronDown, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
