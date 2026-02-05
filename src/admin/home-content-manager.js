@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import axios from "axios"
-import { Save, Upload, Store, FileText, Phone, MapPin, Clock, Award, Gem, Instagram, Plus, X, Loader2, ImageIcon, Sparkles, ChevronUp, ChevronDown } from "lucide-react"
+import { Save, Upload, Store, FileText, Phone, MapPin, Clock, Award, Gem, Instagram, Plus, X, Loader2, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 
 const API = process.env.REACT_APP_API_URL
-
 
 // Componente de secao colapsavel
 function Section({ icon: Icon, title, children, defaultOpen = true }) {
@@ -73,48 +72,6 @@ export function HomeContentManager({ token }) {
   }, [])
 
   async function loadHome() {
-  try {
-    const res = await axios.get(`${API}/home-content`)
-    
-    // Se a API retornar dados, usamos eles. Se não, usamos um objeto padrão.
-    const data = res.data || {};
-
-    setHome({
-      branding: {
-        nome_loja: data.branding?.nome_loja || "",
-        slogan: data.branding?.slogan || "",
-        logo_url: data.branding?.logo_url || "",
-      },
-      hero: {
-        titulo: data.hero?.titulo || "",
-        texto: Array.isArray(data.hero?.texto) ? data.hero.texto.join("\n\n") : "",
-        frase_impacto: data.hero?.frase_impacto || "",
-        cta_texto: data.hero?.cta_texto || "",
-        cta_link: data.hero?.cta_link || "",
-        imagem: data.hero?.imagem || "",
-      },
-      sobre: {
-        titulo: data.sobre?.titulo || "",
-        textos: Array.isArray(data.sobre?.textos) ? data.sobre.textos.join("\n\n") : "",
-        mensagens: Array.isArray(data.sobre?.mensagens) ? data.sobre.mensagens.join("\n") : "",
-        fotos: data.sobre?.fotos || [],
-      },
-      contato: data.contato || { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
-      footer: data.footer || { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] },
-    })
-  } catch (err) {
-    console.error(err)
-    // EM CASO DE ERRO: Inicializamos com um estado vazio para a tela abrir
-    setHome({
-      branding: { nome_loja: "", slogan: "", logo_url: "" },
-      hero: { titulo: "", texto: "", frase_impacto: "", cta_texto: "", cta_link: "", imagem: "" },
-      sobre: { titulo: "", textos: "", mensagens: "", fotos: [] },
-      contato: { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
-      footer: { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] }
-    });
-    toast.error("Aviso: Criando novo conteúdo da Home.");
-  }
-}async function loadHome() {
     try {
       const res = await axios.get(`${API}/home-content`)
 
