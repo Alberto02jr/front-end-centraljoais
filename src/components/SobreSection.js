@@ -14,9 +14,7 @@ const SOBRE_PADRAO = {
     "Envios para todo o Brasil",
   ],
   textos: [
-    "Ha mais de 15 anos, a Central Joias constroi sua historia com base em confianca, tradicao e excelencia, sendo referencia em sua cidade e regiao.",
-    "Nossa trajetoria e heranca de uma tradicao familiar iniciada por nosso bisavo, conhecido como Senhor Inacio, nome respeitado pela honestidade e habilidade artesanal.",
-    "Especialistas em joias artesanais feitas a mao, hoje contamos com duas lojas fisicas em Niqueiandia e Minacu - GO, alem de envios para todo o Brasil.",
+    Fundada com o propósito de unir a tradição da alta joalheria à modernidade do design contemporâneo, a Central Joias consolidou-se como uma referência absoluta em nossa região. Com mais de 10 anos de trajetória, construímos mais do que uma marca: estabelecemos um pacto de confiança e excelência com cada cliente que busca celebrar os momentos mais importantes da vida.
   ],
   fotos: [
     "https://res.cloudinary.com/demo/image/upload/v1/centraljoias/1.jpg",
