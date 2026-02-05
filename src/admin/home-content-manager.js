@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react"
+'use client';
+
+import React, { useEffect, useState } from "react"
 import axios from "axios"
 import { Save, Upload, Store, FileText, Phone, MapPin, Clock, Award, Gem, Instagram, Plus, X, Loader2, ImageIcon, Sparkles, ChevronUp, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -8,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 
 const API = process.env.REACT_APP_API_URL
+
 
 // Componente de secao colapsavel
 function Section({ icon: Icon, title, children, defaultOpen = true }) {
@@ -61,57 +64,109 @@ export function HomeContentManager({ token }) {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
 
-  // Memoize headers
-  const authHeader = React.useMemo(() => ({
+  const authHeader = {
     headers: { Authorization: `Bearer ${token}` },
-  }), [token])
-
-  const loadHome = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/home-content`)
-      const data = res.data || {}
-
-      setHome({
-        branding: {
-          nome_loja: data.branding?.nome_loja || "",
-          slogan: data.branding?.slogan || "",
-          logo_url: data.branding?.logo_url || "",
-        },
-        hero: {
-          titulo: data.hero?.titulo || "",
-          // CORREÇÃO: Lê 'subtitulo' ou 'texto' para compatibilidade
-          texto: Array.isArray(data.hero?.subtitulo) ? data.hero.subtitulo.join("\n\n") : (data.hero?.subtitulo || ""),
-          frase_impacto: data.hero?.frase_impacto || "",
-          // CORREÇÃO: Mapeia botao_texto
-          cta_texto: data.hero?.botao_texto || "",
-          cta_link: data.hero?.cta_link || "",
-          // CORREÇÃO: Mapeia background_url
-          imagem: data.hero?.background_url || "",
-        },
-        sobre: {
-          titulo: data.sobre?.titulo || "",
-          textos: Array.isArray(data.sobre?.textos) ? data.sobre.textos.join("\n\n") : "",
-          mensagens: Array.isArray(data.sobre?.mensagens) ? data.sobre.mensagens.join("\n") : "",
-          fotos: data.sobre?.fotos || [],
-        },
-        contato: data.contato || { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
-        footer: data.footer || { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] },
-      })
-    } catch (err) {
-      console.error("Erro ao carregar API:", err)
-      setHome({
-        branding: { nome_loja: "", slogan: "", logo_url: "" },
-        hero: { titulo: "", texto: "", frase_impacto: "", cta_texto: "", cta_link: "", imagem: "" },
-        sobre: { titulo: "", textos: "", mensagens: "", fotos: [] },
-        contato: { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
-        footer: { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] }
-      })
-    }
-  }, [])
+  }
 
   useEffect(() => {
     loadHome()
-  }, [loadHome])
+  }, [])
+
+  async function loadHome() {
+  try {
+    const res = await axios.get(`${API}/home-content`)
+    
+    // Se a API retornar dados, usamos eles. Se não, usamos um objeto padrão.
+    const data = res.data || {};
+
+    setHome({
+      branding: {
+        nome_loja: data.branding?.nome_loja || "",
+        slogan: data.branding?.slogan || "",
+        logo_url: data.branding?.logo_url || "",
+      },
+      hero: {
+        titulo: data.hero?.titulo || "",
+        texto: Array.isArray(data.hero?.texto) ? data.hero.texto.join("\n\n") : "",
+        frase_impacto: data.hero?.frase_impacto || "",
+        cta_texto: data.hero?.cta_texto || "",
+        cta_link: data.hero?.cta_link || "",
+        imagem: data.hero?.imagem || "",
+      },
+      sobre: {
+        titulo: data.sobre?.titulo || "",
+        textos: Array.isArray(data.sobre?.textos) ? data.sobre.textos.join("\n\n") : "",
+        mensagens: Array.isArray(data.sobre?.mensagens) ? data.sobre.mensagens.join("\n") : "",
+        fotos: data.sobre?.fotos || [],
+      },
+      contato: data.contato || { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
+      footer: data.footer || { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] },
+    })
+  } catch (err) {
+    console.error(err)
+    // EM CASO DE ERRO: Inicializamos com um estado vazio para a tela abrir
+    setHome({
+      branding: { nome_loja: "", slogan: "", logo_url: "" },
+      hero: { titulo: "", texto: "", frase_impacto: "", cta_texto: "", cta_link: "", imagem: "" },
+      sobre: { titulo: "", textos: "", mensagens: "", fotos: [] },
+      contato: { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
+      footer: { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] }
+    });
+    toast.error("Aviso: Criando novo conteúdo da Home.");
+  }
+}async function loadHome() {
+    try {
+      const res = await axios.get(`${API}/home-content`)
+
+      setHome({
+        branding: {
+          nome_loja: res.data.branding?.nome_loja || "",
+          slogan: res.data.branding?.slogan || "",
+          logo_url: res.data.branding?.logo_url || "",
+        },
+
+        hero: {
+          titulo: res.data.hero?.titulo || "",
+          texto: Array.isArray(res.data.hero?.texto)
+            ? res.data.hero.texto.join("\n\n")
+            : "",
+          frase_impacto: res.data.hero?.frase_impacto || "",
+          cta_texto: res.data.hero?.cta_texto || "",
+          cta_link: res.data.hero?.cta_link || "",
+          imagem: res.data.hero?.imagem || "",
+        },
+
+        sobre: {
+          titulo: res.data.sobre?.titulo || "",
+          textos: Array.isArray(res.data.sobre?.textos)
+            ? res.data.sobre.textos.join("\n\n")
+            : "",
+          mensagens: Array.isArray(res.data.sobre?.mensagens)
+            ? res.data.sobre.mensagens.join("\n")
+            : "",
+          fotos: res.data.sobre?.fotos || [],
+        },
+
+        contato: res.data.contato || {
+          titulo: "",
+          subtitulo: "",
+          instagram_url: "",
+          lojas: [],
+        },
+
+        footer: res.data.footer || {
+          institucional: "",
+          cnpj: "",
+          selo_texto: "",
+          lojas: [],
+          certificados: [],
+        },
+      })
+    } catch (err) {
+      console.error(err)
+      toast.error("Erro ao carregar conteudo da Home")
+    }
+  }
 
   async function uploadImage(file) {
     const form = new FormData()
@@ -155,6 +210,7 @@ export function HomeContentManager({ token }) {
     e.target.value = ""
   }
 
+  // Funcoes para gerenciar lojas do contato
   function addContatoLoja() {
     setHome(p => ({
       ...p,
@@ -194,6 +250,7 @@ export function HomeContentManager({ token }) {
     }))
   }
 
+  // Funcoes para gerenciar lojas do footer
   function addFooterLoja() {
     setHome(p => ({
       ...p,
@@ -215,7 +272,7 @@ export function HomeContentManager({ token }) {
       ...p,
       footer: {
         ...p.footer,
-        lojas: (p.footer.lojas || []).map((loja, i) => 
+        lojas: p.footer.lojas.map((loja, i) => 
           i === index ? { ...loja, [field]: value } : loja
         )
       }
@@ -236,17 +293,15 @@ export function HomeContentManager({ token }) {
     try {
       setSaving(true)
 
-      // AQUI ESTÁ O AJUSTE DE CHAVES PARA O SITE RECONHECER
       const payload = {
         slug: "home",
         branding: home.branding,
         hero: {
-          titulo: home.hero.titulo,
-          subtitulo: home.hero.texto, // Mapeado de 'texto' para 'subtitulo'
-          frase_impacto: home.hero.frase_impacto,
-          botao_texto: home.hero.cta_texto, // Mapeado de 'cta_texto' para 'botao_texto'
-          cta_link: home.hero.cta_link,
-          background_url: home.hero.imagem, // Mapeado de 'imagem' para 'background_url'
+          ...home.hero,
+          texto: home.hero.texto
+            .split("\n")
+            .map(t => t.trim())
+            .filter(Boolean),
         },
         sobre: {
           ...home.sobre,
@@ -264,10 +319,10 @@ export function HomeContentManager({ token }) {
       }
 
       await axios.put(`${API}/home-content`, payload, authHeader)
-      toast.success("Página principal atualizada com sucesso")
+      toast.success("Pagina principal atualizada com sucesso")
     } catch (err) {
       console.error(err)
-      toast.error("Erro ao salvar conteúdo")
+      toast.error("Erro ao salvar conteudo")
     } finally {
       setSaving(false)
     }
@@ -275,7 +330,7 @@ export function HomeContentManager({ token }) {
 
   if (!home) {
     return (
-      <div className="flex items-center justify-center py-20 min-h-screen bg-zinc-950">
+      <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
       </div>
     )
@@ -285,20 +340,20 @@ export function HomeContentManager({ token }) {
     <div className="space-y-6 max-w-4xl mx-auto p-6 bg-zinc-950 min-h-screen">
       
       {/* Header da pagina */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+      <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center">
             <FileText className="w-6 h-6 text-amber-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Gerenciar Página Inicial</h1>
-            <p className="text-zinc-500 text-sm">Edite o conteúdo da sua home page</p>
+            <h1 className="text-2xl font-bold text-white">Gerenciar Pagina Inicial</h1>
+            <p className="text-zinc-500 text-sm">Edite o conteudo da sua home page</p>
           </div>
         </div>
         <Button 
           onClick={saveHome} 
           disabled={saving || uploading}
-          className="w-full md:w-auto bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold px-6 shadow-lg shadow-amber-500/20"
+          className="bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold px-6 shadow-lg shadow-amber-500/20"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
           Salvar Tudo
@@ -343,16 +398,16 @@ export function HomeContentManager({ token }) {
       </Section>
 
       {/* HERO */}
-      <Section icon={Sparkles} title="Hero - Seção Principal">
+      <Section icon={Sparkles} title="Hero - Secao Principal">
         <StyledInput
-          label="Título Principal"
+          label="Titulo Principal"
           value={home.hero.titulo}
           onChange={e => setHome(p => ({ ...p, hero: { ...p.hero, titulo: e.target.value } }))}
           placeholder="Central Joias"
         />
         
         <StyledTextarea
-          label="Subtítulo/Texto (aparece abaixo do título)"
+          label="Textos (separe paragrafos com linha em branco)"
           rows={6}
           value={home.hero.texto}
           onChange={e => setHome(p => ({ ...p, hero: { ...p.hero, texto: e.target.value } }))}
@@ -363,18 +418,18 @@ export function HomeContentManager({ token }) {
           label="Frase de Impacto"
           value={home.hero.frase_impacto}
           onChange={e => setHome(p => ({ ...p, hero: { ...p.hero, frase_impacto: e.target.value } }))}
-          placeholder="Onde o luxo e a elegância se encontram"
+          placeholder="Onde o luxo e a elegancia se encontram"
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <StyledInput
-            label="Texto do Botão CTA"
+            label="Texto do Botao CTA"
             value={home.hero.cta_texto}
             onChange={e => setHome(p => ({ ...p, hero: { ...p.hero, cta_texto: e.target.value } }))}
-            placeholder="Conheça nosso catálogo"
+            placeholder="Conheca nosso catalogo"
           />
           <StyledInput
-            label="Link do Botão CTA"
+            label="Link do Botao CTA"
             value={home.hero.cta_link}
             onChange={e => setHome(p => ({ ...p, hero: { ...p.hero, cta_link: e.target.value } }))}
             placeholder="/catalogo"
@@ -395,23 +450,23 @@ export function HomeContentManager({ token }) {
           )}
           <label className="flex-1 border-2 border-dashed border-zinc-700 rounded-xl p-4 flex items-center justify-center gap-3 cursor-pointer hover:border-amber-500/50 hover:bg-amber-500/5 transition-all group">
             {uploading ? <Loader2 className="w-5 h-5 text-amber-500 animate-spin" /> : <ImageIcon className="w-5 h-5 text-zinc-500 group-hover:text-amber-500" />}
-            <span className="text-xs text-zinc-500 group-hover:text-amber-400 font-bold uppercase">Imagem do Banner (Background)</span>
+            <span className="text-xs text-zinc-500 group-hover:text-amber-400 font-bold uppercase">Imagem do Hero (opcional)</span>
             <input type="file" className="hidden" accept="image/*" onChange={handleHeroImageChange} disabled={uploading} />
           </label>
         </div>
       </Section>
 
       {/* SOBRE */}
-      <Section icon={Gem} title="Seção Sobre">
+      <Section icon={Gem} title="Secao Sobre">
         <StyledInput
-          label="Título"
+          label="Titulo"
           value={home.sobre.titulo}
           onChange={e => setHome(p => ({ ...p, sobre: { ...p.sobre, titulo: e.target.value } }))}
-          placeholder="Nossa História"
+          placeholder="Nossa Historia"
         />
 
         <StyledTextarea
-          label="Textos (separe parágrafos com linha em branco)"
+          label="Textos (separe paragrafos com linha em branco)"
           rows={5}
           value={home.sobre.textos}
           onChange={e => setHome(p => ({ ...p, sobre: { ...p.sobre, textos: e.target.value } }))}
@@ -422,7 +477,7 @@ export function HomeContentManager({ token }) {
           rows={4}
           value={home.sobre.mensagens}
           onChange={e => setHome(p => ({ ...p, sobre: { ...p.sobre, mensagens: e.target.value } }))}
-          placeholder="Mais de 15 anos no mercado&#10;Joias artesanais feitas a mão&#10;Referência em Niquelândia"
+          placeholder="Mais de 15 anos no mercado&#10;Joias artesanais feitas a mao&#10;Referencia em Niqueiandia"
         />
 
         <div className="space-y-2">
@@ -448,8 +503,7 @@ export function HomeContentManager({ token }) {
                 accept="image/*"
                 disabled={uploading}
                 onChange={async e => {
-                  const files = Array.from(e.target.files || []);
-                  for (const file of files) {
+                  for (const file of Array.from(e.target.files || [])) {
                     await uploadAndSet(file, url =>
                       setHome(p => ({ ...p, sobre: { ...p.sobre, fotos: [...p.sobre.fotos, url] } }))
                     )
@@ -463,19 +517,19 @@ export function HomeContentManager({ token }) {
       </Section>
 
       {/* CONTATO */}
-      <Section icon={Phone} title="Seção Contato">
+      <Section icon={Phone} title="Secao Contato">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <StyledInput
-            label="Título"
+            label="Titulo"
             value={home.contato.titulo}
             onChange={e => setHome(p => ({ ...p, contato: { ...p.contato, titulo: e.target.value } }))}
             placeholder="Contato"
           />
           <StyledInput
-            label="Subtítulo"
+            label="Subtitulo"
             value={home.contato.subtitulo}
             onChange={e => setHome(p => ({ ...p, contato: { ...p.contato, subtitulo: e.target.value } }))}
-            placeholder="Nossas lojas físicas e atendimento direto"
+            placeholder="Nossas lojas fisicas e atendimento direto"
           />
         </div>
 
@@ -504,9 +558,9 @@ export function HomeContentManager({ token }) {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <Input
-                  placeholder="Nome (ex: Loja Niquelândia)"
+                  placeholder="Nome (ex: Loja Niqueiandia)"
                   className="bg-zinc-900 border-zinc-700 text-white h-10"
                   value={loja.nome}
                   onChange={e => updateContatoLoja(i, "nome", e.target.value)}
@@ -519,19 +573,19 @@ export function HomeContentManager({ token }) {
                 />
               </div>
               <Input
-                placeholder="Título do Card"
+                placeholder="Titulo do Card"
                 className="bg-zinc-900 border-zinc-700 text-white h-10"
                 value={loja.titulo_card}
                 onChange={e => updateContatoLoja(i, "titulo_card", e.target.value)}
               />
               <Textarea
-                placeholder="Endereço completo"
+                placeholder="Endereco completo"
                 className="bg-zinc-900 border-zinc-700 text-white"
                 rows={2}
                 value={loja.endereco}
                 onChange={e => updateContatoLoja(i, "endereco", e.target.value)}
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <Input
                   placeholder="WhatsApp URL"
                   className="bg-zinc-900 border-zinc-700 text-white h-10"
@@ -539,7 +593,7 @@ export function HomeContentManager({ token }) {
                   onChange={e => updateContatoLoja(i, "whatsapp_url", e.target.value)}
                 />
                 <Input
-                  placeholder="Horário"
+                  placeholder="Horario"
                   className="bg-zinc-900 border-zinc-700 text-white h-10"
                   value={loja.horario}
                   onChange={e => updateContatoLoja(i, "horario", e.target.value)}
@@ -557,7 +611,7 @@ export function HomeContentManager({ token }) {
           rows={3}
           value={home.footer.institucional}
           onChange={e => setHome(p => ({ ...p, footer: { ...p.footer, institucional: e.target.value } }))}
-          placeholder="Há mais de 15 anos oferecendo joias..."
+          placeholder="Ha mais de 15 anos oferecendo joias..."
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -571,7 +625,7 @@ export function HomeContentManager({ token }) {
             label="Texto do Selo"
             value={home.footer.selo_texto}
             onChange={e => setHome(p => ({ ...p, footer: { ...p.footer, selo_texto: e.target.value } }))}
-            placeholder="Loja Premium - Referência na Cidade"
+            placeholder="Loja Premium - Referencia na Cidade"
           />
         </div>
 
@@ -601,13 +655,13 @@ export function HomeContentManager({ token }) {
                 onChange={e => updateFooterLoja(i, "nome", e.target.value)}
               />
               <Textarea
-                placeholder="Endereço"
+                placeholder="Endereco"
                 className="bg-zinc-900 border-zinc-700 text-white"
                 rows={2}
                 value={loja.endereco}
                 onChange={e => updateFooterLoja(i, "endereco", e.target.value)}
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <Input
                   placeholder="Telefone"
                   className="bg-zinc-900 border-zinc-700 text-white h-10"
@@ -622,7 +676,7 @@ export function HomeContentManager({ token }) {
                 />
               </div>
               <Input
-                placeholder="Horário de funcionamento"
+                placeholder="Horario de funcionamento"
                 className="bg-zinc-900 border-zinc-700 text-white h-10"
                 value={loja.horario}
                 onChange={e => updateFooterLoja(i, "horario", e.target.value)}
@@ -634,7 +688,7 @@ export function HomeContentManager({ token }) {
         {/* Certificados */}
         <div className="space-y-2 mt-6 pt-4 border-t border-zinc-700">
           <Label className="text-zinc-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-            <Award className="w-4 h-4 text-amber-400" /> Certificados e Premiações
+            <Award className="w-4 h-4 text-amber-400" /> Certificados e Premiacoes
           </Label>
           <div className="flex flex-wrap gap-3">
             {(home.footer.certificados || []).map((c, i) => (
@@ -657,8 +711,7 @@ export function HomeContentManager({ token }) {
                 accept="image/*"
                 disabled={uploading}
                 onChange={async e => {
-                  const files = Array.from(e.target.files || []);
-                  for (const file of files) {
+                  for (const file of Array.from(e.target.files || [])) {
                     await uploadAndSet(file, url =>
                       setHome(p => ({ ...p, footer: { ...p.footer, certificados: [...(p.footer.certificados || []), url] } }))
                     )
@@ -679,7 +732,7 @@ export function HomeContentManager({ token }) {
           className="bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold px-6 py-3 rounded-xl shadow-2xl shadow-amber-500/30"
         >
           {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Save className="w-5 h-5 mr-2" />}
-          Salvar Alterações
+          Salvar Alteracoes
         </Button>
       </div>
     </div>
