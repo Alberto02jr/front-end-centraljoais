@@ -20,22 +20,19 @@ const DESTAQUES = [
 ];
 
 export const SobreSection = ({ homeContent }) => {
-  const sobre = homeContent?.sobre;
-
-  // Se ainda não existe conteúdo vindo da API, não renderiza
-  if (!sobre) return null;
-
-  const titulo = sobre.titulo || "";
-  const textos = sobre.textos ?? [];
-  const mensagens = sobre.mensagens ?? [];
-  const fotos = sobre.fotos ?? [];
-
+  // 🔒 Hooks SEMPRE no topo
   const [fotoAtual, setFotoAtual] = useState(0);
   const [msgAtual, setMsgAtual] = useState(0);
   const [zoom, setZoom] = useState(false);
 
+  const sobre = homeContent?.sobre;
+  const titulo = sobre?.titulo || "";
+  const textos = sobre?.textos ?? [];
+  const mensagens = sobre?.mensagens ?? [];
+  const fotos = sobre?.fotos ?? [];
+
   useEffect(() => {
-    if (fotos.length === 0 || mensagens.length === 0) return;
+    if (!fotos.length || !mensagens.length) return;
 
     const interval = setInterval(() => {
       setFotoAtual(prev => (prev + 1) % fotos.length);
@@ -44,6 +41,9 @@ export const SobreSection = ({ homeContent }) => {
 
     return () => clearInterval(interval);
   }, [fotos.length, mensagens.length]);
+
+  // 👇 Condição APÓS hooks
+  if (!sobre) return null;
 
   const nextFoto = () => {
     if (!fotos.length) return;
@@ -63,12 +63,10 @@ export const SobreSection = ({ homeContent }) => {
 
   return (
     <section id="sobre" className="py-24 px-6 bg-zinc-950 relative overflow-hidden">
-      {/* Background decorativo */}
       <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-amber-500/5 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
 
-        {/* Header */}
         {titulo && (
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-6">
@@ -84,29 +82,11 @@ export const SobreSection = ({ homeContent }) => {
           </div>
         )}
 
-        {/* Destaques */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-          {DESTAQUES.map((item, i) => (
-            <div
-              key={i}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center"
-            >
-              <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <item.icon className="w-6 h-6 text-amber-400" />
-              </div>
-              <p className="text-white font-bold text-lg">{item.label}</p>
-              <p className="text-zinc-500 text-sm">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-          {/* GALERIA */}
           {fotos.length > 0 && (
             <div className="relative order-1 lg:order-2">
 
-              {/* Mensagem flutuante */}
               {mensagens.length > 0 && (
                 <div className="absolute -top-8 left-0 right-0 z-20">
                   <div className="bg-zinc-900/90 backdrop-blur border border-amber-500/30 rounded-xl px-6 py-3 mx-auto w-fit">
@@ -142,7 +122,6 @@ export const SobreSection = ({ homeContent }) => {
             </div>
           )}
 
-          {/* TEXTO */}
           {textos.length > 0 && (
             <div className="order-2 lg:order-1 space-y-6">
               {textos.map((p, i) => (
@@ -156,7 +135,6 @@ export const SobreSection = ({ homeContent }) => {
         </div>
       </div>
 
-      {/* ZOOM */}
       {zoom && fotos.length > 0 && (
         <div
           className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
