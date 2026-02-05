@@ -14,8 +14,7 @@ const SOBRE_PADRAO = {
     "Envios para todo o Brasil",
   ],
   textos: [
-    Fundada com o propósito de unir a tradição da alta joalheria à modernidade do design contemporâneo, a Central Joias consolidou-se como uma referência absoluta em nossa região. Com mais de 10 anos de trajetória, construímos mais do que uma marca: estabelecemos um pacto de confiança e excelência com cada cliente que busca celebrar os momentos mais importantes da vida.
-  ],
+    
   fotos: [
     "https://res.cloudinary.com/demo/image/upload/v1/centraljoias/1.jpg",
     "https://res.cloudinary.com/demo/image/upload/v1/centraljoias/2.jpg",
