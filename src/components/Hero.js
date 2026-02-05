@@ -35,8 +35,6 @@ export const Hero = ({ homeContent }: { homeContent: any }) => {
     );
   }
 
-  console.log("[v0] Hero recebeu homeContent.hero:", JSON.stringify(hero, null, 2));
-
   const titulo = hero.titulo || "";
   const primeiraPalavra = titulo.split(" ")[0] || "";
   const restante = titulo.split(" ").slice(1).join(" ") || "";

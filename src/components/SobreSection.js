@@ -14,8 +14,6 @@ export const SobreSection = ({ homeContent }) => {
   // 1. Pegamos os dados com fallback para objeto vazio para nao quebrar o 'if (!sobre)'
   const sobre = homeContent?.sobre || {};
 
-  console.log("[v0] SobreSection recebeu homeContent.sobre:", JSON.stringify(sobre, null, 2));
-
   // 2. Garantimos que textos e mensagens sejam SEMPRE arrays, mesmo que venham como string ou vazio
   const titulo = sobre?.titulo || "Nossa História";
   

@@ -41,9 +41,6 @@ const Layout = () => {
     async function loadHomeContent() {
       try {
         const res = await axios.get(`${API}/home-content`)
-        console.log("[v0] homeContent recebido do backend:", JSON.stringify(res.data, null, 2))
-        console.log("[v0] hero:", JSON.stringify(res.data?.hero, null, 2))
-        console.log("[v0] sobre:", JSON.stringify(res.data?.sobre, null, 2))
         setHomeContent(res.data)
       } catch (err) {
         console.error('Erro ao carregar home content', err)
