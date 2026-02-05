@@ -1,6 +1,4 @@
-'use client';
-
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import axios from "axios"
 import { Save, Upload, Store, FileText, Phone, MapPin, Clock, Award, Gem, Instagram, Plus, X, Loader2, ImageIcon, Sparkles, ChevronUp, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,7 +8,6 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 
 const API = process.env.REACT_APP_API_URL
-
 
 // Componente de secao colapsavel
 function Section({ icon: Icon, title, children, defaultOpen = true }) {
@@ -64,109 +61,57 @@ export function HomeContentManager({ token }) {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
 
+  // Memoize headers para evitar problemas em useEffects futuros
   const authHeader = {
     headers: { Authorization: `Bearer ${token}` },
   }
 
-  useEffect(() => {
-    loadHome()
-  }, [])
-
-  async function loadHome() {
-  try {
-    const res = await axios.get(`${API}/home-content`)
-    
-    // Se a API retornar dados, usamos eles. Se não, usamos um objeto padrão.
-    const data = res.data || {};
-
-    setHome({
-      branding: {
-        nome_loja: data.branding?.nome_loja || "",
-        slogan: data.branding?.slogan || "",
-        logo_url: data.branding?.logo_url || "",
-      },
-      hero: {
-        titulo: data.hero?.titulo || "",
-        texto: Array.isArray(data.hero?.texto) ? data.hero.texto.join("\n\n") : "",
-        frase_impacto: data.hero?.frase_impacto || "",
-        cta_texto: data.hero?.cta_texto || "",
-        cta_link: data.hero?.cta_link || "",
-        imagem: data.hero?.imagem || "",
-      },
-      sobre: {
-        titulo: data.sobre?.titulo || "",
-        textos: Array.isArray(data.sobre?.textos) ? data.sobre.textos.join("\n\n") : "",
-        mensagens: Array.isArray(data.sobre?.mensagens) ? data.sobre.mensagens.join("\n") : "",
-        fotos: data.sobre?.fotos || [],
-      },
-      contato: data.contato || { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
-      footer: data.footer || { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] },
-    })
-  } catch (err) {
-    console.error(err)
-    // EM CASO DE ERRO: Inicializamos com um estado vazio para a tela abrir
-    setHome({
-      branding: { nome_loja: "", slogan: "", logo_url: "" },
-      hero: { titulo: "", texto: "", frase_impacto: "", cta_texto: "", cta_link: "", imagem: "" },
-      sobre: { titulo: "", textos: "", mensagens: "", fotos: [] },
-      contato: { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
-      footer: { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] }
-    });
-    toast.error("Aviso: Criando novo conteúdo da Home.");
-  }
-}async function loadHome() {
+  // Função de carregar dados isolada
+  const loadHome = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/home-content`)
+      const data = res.data || {}
 
       setHome({
         branding: {
-          nome_loja: res.data.branding?.nome_loja || "",
-          slogan: res.data.branding?.slogan || "",
-          logo_url: res.data.branding?.logo_url || "",
+          nome_loja: data.branding?.nome_loja || "",
+          slogan: data.branding?.slogan || "",
+          logo_url: data.branding?.logo_url || "",
         },
-
         hero: {
-          titulo: res.data.hero?.titulo || "",
-          texto: Array.isArray(res.data.hero?.texto)
-            ? res.data.hero.texto.join("\n\n")
-            : "",
-          frase_impacto: res.data.hero?.frase_impacto || "",
-          cta_texto: res.data.hero?.cta_texto || "",
-          cta_link: res.data.hero?.cta_link || "",
-          imagem: res.data.hero?.imagem || "",
+          titulo: data.hero?.titulo || "",
+          texto: Array.isArray(data.hero?.texto) ? data.hero.texto.join("\n\n") : "",
+          frase_impacto: data.hero?.frase_impacto || "",
+          cta_texto: data.hero?.cta_texto || "",
+          cta_link: data.hero?.cta_link || "",
+          imagem: data.hero?.imagem || "",
         },
-
         sobre: {
-          titulo: res.data.sobre?.titulo || "",
-          textos: Array.isArray(res.data.sobre?.textos)
-            ? res.data.sobre.textos.join("\n\n")
-            : "",
-          mensagens: Array.isArray(res.data.sobre?.mensagens)
-            ? res.data.sobre.mensagens.join("\n")
-            : "",
-          fotos: res.data.sobre?.fotos || [],
+          titulo: data.sobre?.titulo || "",
+          textos: Array.isArray(data.sobre?.textos) ? data.sobre.textos.join("\n\n") : "",
+          mensagens: Array.isArray(data.sobre?.mensagens) ? data.sobre.mensagens.join("\n") : "",
+          fotos: data.sobre?.fotos || [],
         },
-
-        contato: res.data.contato || {
-          titulo: "",
-          subtitulo: "",
-          instagram_url: "",
-          lojas: [],
-        },
-
-        footer: res.data.footer || {
-          institucional: "",
-          cnpj: "",
-          selo_texto: "",
-          lojas: [],
-          certificados: [],
-        },
+        contato: data.contato || { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
+        footer: data.footer || { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] },
       })
     } catch (err) {
-      console.error(err)
-      toast.error("Erro ao carregar conteudo da Home")
+      console.error("Erro ao carregar API:", err)
+      // Estado inicial caso a API falhe (previne o Loader infinito)
+      setHome({
+        branding: { nome_loja: "", slogan: "", logo_url: "" },
+        hero: { titulo: "", texto: "", frase_impacto: "", cta_texto: "", cta_link: "", imagem: "" },
+        sobre: { titulo: "", textos: "", mensagens: "", fotos: [] },
+        contato: { titulo: "", subtitulo: "", instagram_url: "", lojas: [] },
+        footer: { institucional: "", cnpj: "", selo_texto: "", lojas: [], certificados: [] }
+      })
+      toast.error("Aviso: Iniciando com formulário vazio.")
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    loadHome()
+  }, [loadHome])
 
   async function uploadImage(file) {
     const form = new FormData()
@@ -330,7 +275,7 @@ export function HomeContentManager({ token }) {
 
   if (!home) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="flex items-center justify-center py-20 min-h-screen bg-zinc-950">
         <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
       </div>
     )
@@ -340,7 +285,7 @@ export function HomeContentManager({ token }) {
     <div className="space-y-6 max-w-4xl mx-auto p-6 bg-zinc-950 min-h-screen">
       
       {/* Header da pagina */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center">
             <FileText className="w-6 h-6 text-amber-400" />
@@ -353,7 +298,7 @@ export function HomeContentManager({ token }) {
         <Button 
           onClick={saveHome} 
           disabled={saving || uploading}
-          className="bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold px-6 shadow-lg shadow-amber-500/20"
+          className="w-full md:w-auto bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold px-6 shadow-lg shadow-amber-500/20"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
           Salvar Tudo
@@ -558,7 +503,7 @@ export function HomeContentManager({ token }) {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Input
                   placeholder="Nome (ex: Loja Niqueiandia)"
                   className="bg-zinc-900 border-zinc-700 text-white h-10"
@@ -585,7 +530,7 @@ export function HomeContentManager({ token }) {
                 value={loja.endereco}
                 onChange={e => updateContatoLoja(i, "endereco", e.target.value)}
               />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Input
                   placeholder="WhatsApp URL"
                   className="bg-zinc-900 border-zinc-700 text-white h-10"
@@ -661,7 +606,7 @@ export function HomeContentManager({ token }) {
                 value={loja.endereco}
                 onChange={e => updateFooterLoja(i, "endereco", e.target.value)}
               />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Input
                   placeholder="Telefone"
                   className="bg-zinc-900 border-zinc-700 text-white h-10"
