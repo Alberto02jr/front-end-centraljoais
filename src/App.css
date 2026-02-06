@@ -1,41 +1,68 @@
-* {
-  box-sizing: border-box;
-}
+/* --- TEMA LUXO: BORDAS E FUNDO --- */
 
+/* Ajuste no fundo principal para não ser apenas uma cor chapada */
 .App {
   min-height: 100vh;
-  background-color: #050505;
+  background: radial-gradient(circle at top center, #121212 0%, #050505 100%);
+  color: #ffffff;
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Bordas Douradas Sutis para o Header e Containers */
+header, .container-catalogo {
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2) !important;
+  backdrop-filter: blur(12px);
 }
 
-.animate-fade-in {
-  animation: fade-in 1s ease-out;
-}
-@keyframes scrollUp {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-50%); }
-}
-
-@keyframes scrollDown {
-  0% { transform: translateY(-50%); }
-  100% { transform: translateY(0); }
+/* Efeito de Vidro e Borda nos Cards de Joias */
+.card-produto, [class*="rounded-lg"] {
+  background: rgba(20, 20, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-.animate-scroll-up {
-  animation: scrollUp 25s linear infinite;
+/* Quando passa o mouse no card ou botão */
+.card-produto:hover, button:hover {
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), 
+              0 0 15px rgba(245, 158, 11, 0.1);
+  transform: translateY(-4px);
 }
 
-.animate-scroll-down {
-  animation: scrollDown 25s linear infinite;
+/* Brilho Linear no topo (Efeito linha de ouro) */
+header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.5), transparent);
 }
 
+/* Estilização de botões de destaque (Ver Joias, Carrinho) */
+.bg-amber-500 {
+  background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%) !important;
+  border: none !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Badge do carrinho com brilho */
+span.bg-amber-500 {
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+/* Inputs e filtros do catálogo */
+input, select {
+  background: #0a0a0a !important;
+  border: 1px solid #27272a !important;
+  color: #fff !important;
+}
+
+input:focus {
+  border-color: #f59e0b !important;
+  outline: none;
+}

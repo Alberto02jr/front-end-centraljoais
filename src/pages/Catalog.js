@@ -2,36 +2,19 @@
 
 import { useEffect, useRef, useState, useMemo } from "react"
 import { 
-  ChevronLeft, 
-  ChevronRight, 
-  X, 
-  Search, 
-  ShieldCheck, 
-  CreditCard, 
-  Truck, 
-  Star, 
-  Heart,
-  Filter,
-  SlidersHorizontal,
-  Package,
-  Award,
-  Sparkles,
-  ChevronDown,
-  Clock,
-  Gem,
-  Scale,
-  Ruler,
-  Palette,
-  Info,
-  Check,
-  Minus,
-  Plus,
-  Share2,
-  ZoomIn
+  ChevronLeft, ChevronRight, X, Search, ShieldCheck, CreditCard, 
+  Truck, Star, Heart, SlidersHorizontal, Package, Award, 
+  Sparkles, ChevronDown, Clock, Gem, Scale, Ruler, 
+  Palette, Info, Check, Minus, Plus, Share2, ZoomIn, Crown
 } from "lucide-react"
 import { useCart } from "../context/CartContext"
 
-const API = process.env.REACT_APP_API_URL
+// --- ADICIONE ESTAS DUAS LINHAS ABAIXO ---
+import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
+// -----------------------------------------
+
+const API = "https://central-joias-backend.up.railway.app/api";
 
 const CAROUSELS = [
   { slug: "aliancas-prata-950", title: "Aliancas de Prata 950", icon: "ring" },
@@ -80,11 +63,13 @@ export const Catalog = () => {
   const [quantity, setQuantity] = useState(1)
   const [imageZoom, setImageZoom] = useState(false)
 
+  // ... (mantenha todos os seus useEffects e useMemos aqui embaixo)
+
   useEffect(() => {
     fetch(`${API}/products`)
       .then(r => r.json())
       .then(data =>
-        setProducts(Array.isArray(data) ? data.filter(p => p.active) : [])
+        setProducts(Array.isArray(data) ? data.filter((p) => p.active) : [])
       )
       .catch(() => setProducts([]))
   }, [])
@@ -162,40 +147,56 @@ export const Catalog = () => {
     return SPEC_ICONS.default
   }
 
-  return (
-    <div className="min-h-screen pt-28 pb-20 px-4 md:px-8 lg:px-12 bg-zinc-950 text-white">
+ return (
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* HEADER NO TOPO DE TUDO */}
+      <Header />
 
-      {/* BOTAO BUSCA FLUTUANTE */}
-      <button
-        onClick={() => setSearchOpen(true)}
-        className="fixed top-24 right-4 md:right-8 z-40 bg-zinc-800 border border-zinc-600 p-3.5 rounded-full hover:bg-amber-500 hover:border-amber-500 transition-all duration-300 shadow-lg hover:shadow-amber-500/20 group"
-      >
-        <Search className="w-5 h-5 text-zinc-300 group-hover:text-zinc-900 transition-colors" />
-      </button>
+      {/* CONTEÚDO DO CATÁLOGO */}
+      <main className="flex-grow pt-32 pb-20 px-4 md:px-8 lg:px-16 bg-background text-foreground relative">
+        
+        {/* Linha decorativa no topo (Z-index aumentado para 60) */}
+        <div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold-dark via-gold to-gold-dark z-[60]" />
 
-      {/* MODAL DE BUSCA PROFISSIONAL */}
+        {/* BOTAO BUSCA FLUTUANTE (Top ajustado para 28 para não cobrir o Header) */}
+        <button
+          onClick={() => setSearchOpen(true)}
+          className="fixed top-28 right-4 md:right-8 z-40 bg-card border border-gold/30 p-3.5 rounded-full hover:bg-gold hover:border-gold transition-all duration-300 shadow-lg hover:shadow-gold/25 group"
+          aria-label="Buscar produtos"
+        ></button>
+          <Search className="w-5 h-5 text-gold group-hover:text-background transition-colors" />
+
+      {/* MODAL DE BUSCA */}
       {searchOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md flex items-start justify-center pt-20 md:pt-28 px-4 animate-in fade-in duration-200"
-          onClick={(e) => e.target === e.currentTarget && (setSearchOpen(false), setSearchTerm(""), setSelectedCategory("all"), setSelectedPriceRange(0))}
+          className="fixed inset-0 z-50 bg-background/97 backdrop-blur-md flex items-start justify-center pt-20 md:pt-28 px-4 animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSearchOpen(false)
+              setSearchTerm("")
+              setSelectedCategory("all")
+              setSelectedPriceRange(0)
+            }
+          }}
         >
-          <div className="bg-card w-full max-w-4xl rounded-2xl border border-border shadow-2xl overflow-hidden animate-in slide-in-from-top-4 duration-300">
+          <div className="bg-card w-full max-w-4xl rounded-2xl border border-gold/20 shadow-2xl shadow-gold/5 overflow-hidden animate-in slide-in-from-top-4 duration-300">
             {/* Header da Busca */}
-            <div className="p-6 border-b border-border">
+            <div className="p-6 border-b border-border bg-card">
               <div className="flex items-center gap-4">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gold/60" />
                   <input
                     autoFocus
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                     placeholder="Buscar por nome, material, categoria..."
-                    className="w-full bg-secondary/50 border border-border rounded-xl text-lg pl-12 pr-4 py-4 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground"
+                    className="w-full bg-secondary border border-border rounded-xl text-lg pl-12 pr-4 py-4 outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all placeholder:text-muted-foreground text-foreground"
                   />
                 </div>
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`p-4 rounded-xl border transition-all ${showFilters ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary/50 border-border hover:border-primary/50'}`}
+                  className={`p-4 rounded-xl border transition-all ${showFilters ? 'bg-gold text-background border-gold' : 'bg-secondary border-border hover:border-gold/50 text-foreground'}`}
+                  aria-label="Filtros"
                 >
                   <SlidersHorizontal className="w-5 h-5" />
                 </button>
@@ -206,7 +207,8 @@ export const Catalog = () => {
                     setSelectedCategory("all")
                     setSelectedPriceRange(0)
                   }}
-                  className="p-4 rounded-xl bg-secondary/50 border border-border hover:bg-destructive/10 hover:border-destructive/50 hover:text-destructive transition-all"
+                  className="p-4 rounded-xl bg-secondary border border-border hover:bg-destructive/20 hover:border-destructive/50 hover:text-destructive transition-all text-foreground"
+                  aria-label="Fechar busca"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -217,12 +219,12 @@ export const Catalog = () => {
                 <div className="mt-6 pt-6 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-200">
                   {/* Categoria */}
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Categoria</label>
+                    <label className="text-xs font-semibold text-gold uppercase tracking-wider mb-2 block">Categoria</label>
                     <div className="relative">
                       <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-3 outline-none focus:border-primary appearance-none cursor-pointer"
+                        className="w-full bg-secondary border border-border rounded-lg px-4 py-3 outline-none focus:border-gold appearance-none cursor-pointer text-foreground"
                       >
                         <option value="all">Todas as categorias</option>
                         {CAROUSELS.map(c => (
@@ -235,12 +237,12 @@ export const Catalog = () => {
 
                   {/* Faixa de Preco */}
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Faixa de Preco</label>
+                    <label className="text-xs font-semibold text-gold uppercase tracking-wider mb-2 block">Faixa de Preco</label>
                     <div className="relative">
                       <select
                         value={selectedPriceRange}
                         onChange={(e) => setSelectedPriceRange(Number(e.target.value))}
-                        className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-3 outline-none focus:border-primary appearance-none cursor-pointer"
+                        className="w-full bg-secondary border border-border rounded-lg px-4 py-3 outline-none focus:border-gold appearance-none cursor-pointer text-foreground"
                       >
                         {PRICE_RANGES.map((range, i) => (
                           <option key={i} value={i}>{range.label}</option>
@@ -256,9 +258,9 @@ export const Catalog = () => {
             {/* Resultados */}
             <div className="max-h-[55vh] overflow-y-auto">
               {(searchTerm || selectedCategory !== "all" || selectedPriceRange !== 0) && (
-                <div className="p-4 border-b border-border bg-secondary/30">
+                <div className="p-4 border-b border-border bg-secondary/50">
                   <p className="text-sm text-muted-foreground">
-                    <span className="font-semibold text-foreground">{searchResults.length}</span> produto(s) encontrado(s)
+                    <span className="font-semibold text-gold">{searchResults.length}</span> produto(s) encontrado(s)
                   </p>
                 </div>
               )}
@@ -275,13 +277,14 @@ export const Catalog = () => {
                         setSelectedCategory("all")
                         setSelectedPriceRange(0)
                       }}
-                      className="flex gap-4 items-center p-4 rounded-xl bg-secondary/30 hover:bg-secondary/60 cursor-pointer border border-transparent hover:border-primary/30 transition-all group"
+                      className="flex gap-4 items-center p-4 rounded-xl bg-secondary/50 hover:bg-secondary cursor-pointer border border-transparent hover:border-gold/30 transition-all group"
                     >
-                      <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border border-gold/10">
                         <img
                           src={p.images?.[0] || "/placeholder.jpg"}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                           alt={p.name}
+                          crossOrigin="anonymous"
                         />
                         {hasPromo(p) && (
                           <div className="absolute top-1 left-1 bg-destructive text-destructive-foreground text-[9px] font-bold px-1.5 py-0.5 rounded">
@@ -290,7 +293,7 @@ export const Catalog = () => {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-serif text-base truncate group-hover:text-primary transition-colors">{p.name}</p>
+                        <p className="font-serif text-base truncate group-hover:text-gold transition-colors text-foreground">{p.name}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 capitalize">{p.category?.replace(/-/g, ' ')}</p>
                         <div className="mt-2">
                           {hasPromo(p) ? (
@@ -299,11 +302,11 @@ export const Catalog = () => {
                               <span className="text-destructive font-bold">R$ {fPrice(p.promo_price)}</span>
                             </div>
                           ) : (
-                            <span className="text-primary font-bold">R$ {fPrice(p.price)}</span>
+                            <span className="text-gold font-bold">R$ {fPrice(p.price)}</span>
                           )}
                         </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-gold group-hover:translate-x-1 transition-all" />
                     </div>
                   ))}
                 </div>
@@ -315,7 +318,7 @@ export const Catalog = () => {
                 </div>
               ) : (
                 <div className="p-12 text-center">
-                  <Sparkles className="w-12 h-12 text-primary/30 mx-auto mb-4" />
+                  <Sparkles className="w-12 h-12 text-gold/30 mx-auto mb-4" />
                   <p className="text-muted-foreground">Digite algo para buscar</p>
                   <p className="text-sm text-muted-foreground/70 mt-1">ou use os filtros para explorar nosso catalogo</p>
                 </div>
@@ -325,69 +328,112 @@ export const Catalog = () => {
         </div>
       )}
 
+      {/* HERO / TITULO DO CATALOGO */}
+      <div className="text-center mb-16">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="h-px w-12 bg-gradient-to-r from-transparent to-gold/60" />
+          <Crown className="w-6 h-6 text-gold" />
+          <div className="h-px w-12 bg-gradient-to-l from-transparent to-gold/60" />
+        </div>
+        <h1 className="text-4xl md:text-5xl font-serif text-foreground tracking-tight text-balance">
+          Nosso <span className="text-gold">Catalogo</span>
+        </h1>
+        <p className="text-muted-foreground mt-3 text-lg max-w-xl mx-auto leading-relaxed">
+          Pecas exclusivas em prata 950, moeda antiga e semi joias
+        </p>
+        <div className="flex items-center justify-center gap-3 mt-6">
+          <div className="h-px w-20 bg-gradient-to-r from-transparent to-gold/40" />
+          <Gem className="w-4 h-4 text-gold/60" />
+          <div className="h-px w-20 bg-gradient-to-l from-transparent to-gold/40" />
+        </div>
+      </div>
+
       {/* CARROSSEIS */}
       {CAROUSELS.map(c => {
         const list = products.filter(p => p.category === c.slug)
         if (!list.length) return null
 
         return (
-          <section key={c.slug} className="mb-16">
+          <section key={c.slug} className="mb-20">
             {/* Header da Categoria */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
-                <div className="w-1 h-8 bg-amber-500 rounded-full" />
-                <h2 className="text-2xl md:text-3xl font-serif text-white">
-                  {c.title}
-                </h2>
-                <span className="text-sm text-zinc-400 bg-zinc-800 px-3 py-1 rounded-full border border-zinc-700">
-                  {list.length} {list.length === 1 ? 'item' : 'itens'}
-                </span>
+                <div className="w-1.5 h-10 bg-gradient-to-b from-gold to-gold-dark rounded-full" />
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-serif text-foreground tracking-tight">
+                    {c.title}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {list.length} {list.length === 1 ? 'peca disponivel' : 'pecas disponiveis'}
+                  </p>
+                </div>
+              </div>
+              <div className="hidden md:flex items-center gap-2">
+                <button
+                  onClick={() => scroll(c.slug, -1)}
+                  className="p-2.5 rounded-full bg-card border border-border hover:border-gold/50 hover:bg-gold/10 transition-all text-muted-foreground hover:text-gold"
+                  aria-label="Anterior"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => scroll(c.slug, 1)}
+                  className="p-2.5 rounded-full bg-card border border-border hover:border-gold/50 hover:bg-gold/10 transition-all text-muted-foreground hover:text-gold"
+                  aria-label="Proximo"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </div>
             </div>
 
             <div className="relative group">
-              {/* Botao Esquerda */}
+              {/* Botao Esquerda - mobile */}
               <button
                 onClick={() => scroll(c.slug, -1)}
-                className="absolute -left-2 md:-left-5 top-1/2 -translate-y-1/2 z-10 bg-zinc-800 border border-zinc-600 p-2.5 md:p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-amber-500 hover:text-zinc-900 hover:border-amber-500 shadow-lg text-white"
+                className="md:hidden absolute -left-1 top-1/2 -translate-y-1/2 z-10 bg-card border border-gold/30 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gold hover:text-background shadow-lg text-gold"
+                aria-label="Anterior"
               >
-                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
 
               {/* Grid de Produtos */}
               <div
-                ref={el => (scrollRefs.current[c.slug] = el)}
-                className="flex gap-5 overflow-x-auto scroll-smooth scrollbar-hide pb-4 -mx-2 px-2"
+                ref={el => { scrollRefs.current[c.slug] = el }}
+                className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide pb-4 -mx-2 px-2"
               >
                 {list.map(p => (
                   <div
                     key={p.id}
-                    className="min-w-[280px] max-w-[280px] bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-700 hover:border-amber-500/50 transition-all duration-300 flex flex-col group/card hover:shadow-xl hover:shadow-amber-500/10"
+                    className="min-w-[280px] max-w-[280px] bg-card rounded-2xl overflow-hidden border border-border hover:border-gold/40 transition-all duration-500 flex flex-col group/card hover:shadow-2xl hover:shadow-gold/8 hover:-translate-y-1"
                     onMouseEnter={() => setHoveredProduct(p.id)}
                     onMouseLeave={() => setHoveredProduct(null)}
                   >
                     {/* Imagem do Produto */}
-                    <div className="relative h-64 overflow-hidden bg-zinc-800">
+                    <div className="relative h-72 overflow-hidden bg-secondary">
                       <img
                         src={
                           hoveredProduct === p.id && p.images?.[1] 
                             ? p.images[1] 
                             : p.images?.[0] || "/placeholder.jpg"
                         }
-                        className="w-full h-full object-cover transition-all duration-500 group-hover/card:scale-105"
+                        className="w-full h-full object-cover transition-all duration-700 group-hover/card:scale-110"
                         alt={p.name}
+                        crossOrigin="anonymous"
                       />
                       
-                      {/* Overlay com acoes */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover/card:opacity-100 transition-all duration-300">
+                      {/* Overlay sutil na base */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/30 to-transparent opacity-0 group-hover/card:opacity-100 transition-all duration-500">
                         <div className="absolute bottom-4 left-4 right-4 flex gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               setActiveProduct(p)
                             }}
-                            className="flex-1 bg-amber-500 text-zinc-900 py-2.5 rounded-lg font-bold text-sm hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/30"
+                            className="
+flex-1 bg-amber-500  text-zinc-900  py-3  rounded-xl  font-bold  text-sm  hover:bg-amber-400 transition-all  shadow-xl  shadow-amber-500/40  backdrop-blur  flex  items-center justify-center  gap-2 
+"
                           >
+                            <Gem className="w-4 h-4" />
                             Ver Detalhes
                           </button>
                           <button
@@ -395,11 +441,12 @@ export const Catalog = () => {
                               e.stopPropagation()
                               toggleFavorite(p.id)
                             }}
-                            className={`p-2.5 rounded-lg border-2 transition-all shadow-lg ${
+                            className={`p-3 rounded-xl border-2 transition-all shadow-lg ${
                               favorites.includes(p.id) 
-                                ? 'bg-red-500 border-red-400 text-white shadow-red-500/30' 
-                                : 'bg-zinc-800 border-zinc-600 text-white hover:bg-red-500 hover:border-red-400 hover:shadow-red-500/30'
+                                ? 'bg-destructive border-destructive text-destructive-foreground shadow-destructive/30' 
+                                : 'bg-card/90 border-gold/30 text-gold hover:bg-destructive hover:border-destructive hover:text-destructive-foreground'
                             }`}
+                            aria-label={favorites.includes(p.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
                           >
                             <Heart className={`w-5 h-5 ${favorites.includes(p.id) ? 'fill-current' : ''}`} />
                           </button>
@@ -408,26 +455,29 @@ export const Catalog = () => {
 
                       {/* Badge de Promocao */}
                       {hasPromo(p) && (
-                        <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg shadow-red-500/30 flex items-center gap-1.5">
+                        <div className="absolute top-3 left-3 bg-destructive text-destructive-foreground text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg shadow-destructive/30 flex items-center gap-1.5">
                           <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive-foreground opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive-foreground"></span>
                           </span>
                           -{getDiscount(p)}% OFF
                         </div>
                       )}
 
-                      {/* Indicador de Imagens */}
-                      {p.images?.length > 1 && (
-                        <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur text-xs px-2 py-1 rounded-md flex items-center gap-1 opacity-0 group-hover/card:opacity-0 transition-opacity">
-                          <span>{p.images.length} fotos</span>
+                      {/* Favorito visivel no card */}
+                      {favorites.includes(p.id) && (
+                        <div className="absolute top-3 right-3">
+                          <Heart className="w-5 h-5 text-destructive fill-destructive drop-shadow-md" />
                         </div>
                       )}
                     </div>
 
                     {/* Conteudo do Card */}
                     <div className="p-5 flex flex-col flex-1">
-                      <h3 className="font-serif text-lg mb-2 line-clamp-2 leading-tight text-white group-hover/card:text-amber-400 transition-colors">
+                      <p className="text-xs text-gold/70 font-medium uppercase tracking-widest mb-1.5">
+                        {c.title}
+                      </p>
+                      <h3 className="font-serif text-lg mb-3 line-clamp-2 leading-snug text-foreground group-hover/card:text-gold transition-colors duration-300">
                         {p.name}
                       </h3>
 
@@ -435,25 +485,29 @@ export const Catalog = () => {
                       <div className="mb-4">
                         {hasPromo(p) ? (
                           <div className="space-y-1">
-                            <span className="line-through text-zinc-500 text-sm block">R$ {fPrice(p.price)}</span>
-                            <span className="text-red-400 text-2xl font-bold block">R$ {fPrice(p.promo_price)}</span>
+                            <span className="line-through text-muted-foreground text-sm block">R$ {fPrice(p.price)}</span>
+                            <span className="text-destructive text-2xl font-bold block">R$ {fPrice(p.promo_price)}</span>
                           </div>
                         ) : (
-                          <span className="text-amber-400 text-2xl font-bold block">R$ {fPrice(p.price)}</span>
+                          <span className="text-gold text-2xl font-bold block">R$ {fPrice(p.price)}</span>
                         )}
                       </div>
 
                       {/* Trust Badges */}
-                      <div className="mt-auto pt-4 border-t border-zinc-700 space-y-2">
-                        <div className="flex items-center gap-2 text-emerald-400">
-                          <CreditCard className="w-4 h-4 flex-shrink-0" />
-                          <span className="text-xs font-medium">
+                      <div className="mt-auto pt-4 border-t border-border space-y-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-emerald-900/40 flex items-center justify-center flex-shrink-0">
+                            <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
+                          </div>
+                          <span className="text-xs font-medium text-foreground/80">
                             {p.specifications?.parcelamento || "Ate 10x sem juros"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-amber-400">
-                          <ShieldCheck className="w-4 h-4 flex-shrink-0" />
-                          <span className="text-xs font-medium">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">
+                            <ShieldCheck className="w-3.5 h-3.5 text-gold" />
+                          </div>
+                          <span className="text-xs font-medium text-foreground/80">
                             {p.specifications?.garantia || "Garantia Vitalicia"}
                           </span>
                         </div>
@@ -463,12 +517,13 @@ export const Catalog = () => {
                 ))}
               </div>
 
-              {/* Botao Direita */}
+              {/* Botao Direita - mobile */}
               <button
                 onClick={() => scroll(c.slug, 1)}
-                className="absolute -right-2 md:-right-5 top-1/2 -translate-y-1/2 z-10 bg-zinc-800 border border-zinc-600 p-2.5 md:p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-amber-500 hover:text-zinc-900 hover:border-amber-500 shadow-lg text-white"
+                className="md:hidden absolute -right-1 top-1/2 -translate-y-1/2 z-10 bg-card border border-gold/30 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gold hover:text-background shadow-lg text-gold"
+                aria-label="Proximo"
               >
-                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </section>
@@ -478,16 +533,16 @@ export const Catalog = () => {
       {/* MODAL DE PRODUTO DETALHADO */}
       {activeProduct && (
         <div 
-          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[100] bg-background/85 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={(e) => e.target === e.currentTarget && setActiveProduct(null)}
         >
-          <div className="bg-zinc-900 w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-zinc-700 shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="bg-card w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-gold/20 shadow-2xl shadow-gold/5 animate-in zoom-in-95 duration-300">
             
             {/* Header Fixo */}
-            <div className="sticky top-0 z-20 bg-zinc-900/95 backdrop-blur border-b border-zinc-700 px-5 py-3 flex items-center justify-between">
+            <div className="sticky top-0 z-20 bg-card/98 backdrop-blur-sm border-b border-border px-5 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Gem className="w-4 h-4 text-amber-400" />
-                <span className="text-sm text-zinc-300 font-medium">Detalhes do Produto</span>
+                <Gem className="w-4 h-4 text-gold" />
+                <span className="text-sm text-foreground/70 font-medium">Detalhes do Produto</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -496,7 +551,8 @@ export const Catalog = () => {
                       navigator.share({ title: activeProduct.name, url: window.location.href })
                     }
                   }}
-                  className="p-2 rounded-lg bg-zinc-800 border border-zinc-600 hover:bg-zinc-700 hover:border-zinc-500 transition-colors text-zinc-300"
+                  className="p-2 rounded-lg bg-secondary border border-border hover:border-gold/40 hover:text-gold transition-colors text-muted-foreground"
+                  aria-label="Compartilhar"
                 >
                   <Share2 className="w-4 h-4" />
                 </button>
@@ -504,15 +560,17 @@ export const Catalog = () => {
                   onClick={() => toggleFavorite(activeProduct.id)}
                   className={`p-2 rounded-lg border transition-colors ${
                     favorites.includes(activeProduct.id) 
-                      ? 'bg-red-500/20 border-red-500 text-red-400' 
-                      : 'bg-zinc-800 border-zinc-600 hover:bg-zinc-700 hover:border-zinc-500 text-zinc-300'
+                      ? 'bg-destructive/15 border-destructive/40 text-destructive' 
+                      : 'bg-secondary border-border hover:border-gold/40 hover:text-gold text-muted-foreground'
                   }`}
+                  aria-label="Favoritar"
                 >
                   <Heart className={`w-4 h-4 ${favorites.includes(activeProduct.id) ? 'fill-current' : ''}`} />
                 </button>
                 <button
                   onClick={() => setActiveProduct(null)}
-                  className="p-2 rounded-lg bg-zinc-800 border border-zinc-600 hover:bg-red-500/20 hover:border-red-500 hover:text-red-400 transition-colors text-zinc-300"
+                  className="p-2 rounded-lg bg-secondary border border-border hover:bg-destructive/15 hover:border-destructive/40 hover:text-destructive transition-colors text-muted-foreground"
+                  aria-label="Fechar"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -524,23 +582,24 @@ export const Catalog = () => {
               {/* Galeria de Imagens */}
               <div className="space-y-3">
                 <div 
-                  className="relative aspect-[4/3] rounded-xl overflow-hidden bg-zinc-800 cursor-zoom-in group"
+                  className="relative aspect-[4/3] rounded-xl overflow-hidden bg-secondary border border-border cursor-zoom-in group"
                   onClick={() => setImageZoom(true)}
                 >
                   <img
                     src={activeProduct.images?.[activeImageIndex] || "/placeholder.jpg"}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     alt={activeProduct.name}
+                    crossOrigin="anonymous"
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                  <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors flex items-center justify-center">
+                    <ZoomIn className="w-6 h-6 text-foreground opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
                   </div>
                   
                   {hasPromo(activeProduct) && (
-                    <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1.5 rounded-lg font-bold text-sm flex items-center gap-1.5 shadow-lg">
+                    <div className="absolute top-3 left-3 bg-destructive text-destructive-foreground px-3 py-1.5 rounded-lg font-bold text-sm flex items-center gap-1.5 shadow-lg">
                       <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive-foreground opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive-foreground"></span>
                       </span>
                       {getDiscount(activeProduct)}% OFF
                     </div>
@@ -556,11 +615,11 @@ export const Catalog = () => {
                         onClick={() => setActiveImageIndex(idx)}
                         className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                           idx === activeImageIndex 
-                            ? 'border-amber-400 shadow-lg shadow-amber-400/20' 
-                            : 'border-zinc-600 hover:border-zinc-500'
+                            ? 'border-gold shadow-lg shadow-gold/20' 
+                            : 'border-border hover:border-gold/40'
                         }`}
                       >
-                        <img src={img} className="w-full h-full object-cover" alt="" />
+                        <img src={img || "/placeholder.svg"} className="w-full h-full object-cover" alt="" crossOrigin="anonymous" />
                       </button>
                     ))}
                   </div>
@@ -570,10 +629,10 @@ export const Catalog = () => {
               {/* Informacoes do Produto */}
               <div className="space-y-4">
                 <div>
-                  <p className="text-xs text-amber-400 font-medium mb-1 capitalize tracking-wide">
+                  <p className="text-xs text-gold font-semibold mb-1.5 capitalize tracking-widest uppercase">
                     {activeProduct.category?.replace(/-/g, ' ')}
                   </p>
-                  <h2 className="font-serif text-xl text-white leading-tight">
+                  <h2 className="font-serif text-xl text-foreground leading-tight">
                     {activeProduct.name}
                   </h2>
                 </div>
@@ -581,11 +640,11 @@ export const Catalog = () => {
                 {/* Badges de Confianca */}
                 <div className="flex flex-wrap gap-1.5">
                   {hasPromo(activeProduct) && (
-                    <span className="bg-red-500/20 text-red-400 text-[10px] font-bold px-2.5 py-1.5 rounded-full border border-red-500/30 flex items-center gap-1">
+                    <span className="bg-destructive/15 text-destructive text-[10px] font-bold px-2.5 py-1.5 rounded-full border border-destructive/25 flex items-center gap-1">
                       <Clock className="w-3 h-3" /> OFERTA LIMITADA
                     </span>
                   )}
-                  <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                  <span className="bg-emerald-900/30 text-emerald-400 text-[10px] font-bold px-2.5 py-1.5 rounded-full border border-emerald-800/40 flex items-center gap-1">
                     <CreditCard className="w-3 h-3" /> 10X S/ JUROS
                   </span>
                   <span className="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2.5 py-1.5 rounded-full border border-amber-500/30 flex items-center gap-1">
@@ -763,38 +822,50 @@ export const Catalog = () => {
       {/* Modal de Zoom da Imagem */}
       {imageZoom && activeProduct && (
         <div 
-          className="fixed inset-0 z-[110] bg-background/98 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-200"
+          className="fixed inset-0 z-[110] bg-background/98 backdrop-blur-md flex items-center justify-center p-4"
           onClick={() => setImageZoom(false)}
         >
           <button
+            type="button"
             onClick={() => setImageZoom(false)}
-            className="absolute top-6 right-6 p-3 rounded-full bg-card border border-border hover:bg-secondary transition-colors"
+            className="absolute top-6 right-6 p-3 rounded-full bg-card border border-border"
           >
             <X className="w-6 h-6" />
           </button>
+
           <img
             src={activeProduct.images?.[activeImageIndex] || "/placeholder.jpg"}
             className="max-w-full max-h-[85vh] object-contain rounded-2xl"
-            alt={activeProduct.name}
+            alt="Zoom"
           />
-          {activeProduct.images?.length > 1 && (
+
+          {/* Paginação das Imagens (Dots) */}
+          {activeProduct?.images?.length > 1 && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 bg-card/90 backdrop-blur p-2 rounded-full border border-border">
               {activeProduct.images.map((_, idx) => (
                 <button
                   key={idx}
+                  type="button"
                   onClick={(e) => {
-                    e.stopPropagation()
-                    setActiveImageIndex(idx)
+                    e.stopPropagation();
+                    setActiveImageIndex(idx);
                   }}
                   className={`w-3 h-3 rounded-full transition-all ${
-                    idx === activeImageIndex ? 'bg-primary scale-125' : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                    idx === activeImageIndex ? 'bg-primary scale-125' : 'bg-muted-foreground/30'
                   }`}
+                  aria-label={`Ir para imagem ${idx + 1}`}
                 />
               ))}
             </div>
           )}
-        </div>
-      )}
-    </div>
-  )
-}
+        {/* Aqui fecha a div do card ou container do activeProduct */}
+        </div> 
+      )} 
+
+    </main>
+
+    <Footer />
+
+  </div>
+  ); // Fecha o return
+}; // Fecha o componente

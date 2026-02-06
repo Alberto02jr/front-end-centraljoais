@@ -80,7 +80,7 @@ export const Header = ({ cartCount = 0, homeContent }) => {
             <div className="relative">
               <div className="absolute inset-0 bg-amber-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
               <img
-                key={logo_url} // A 'key' ajuda o React a remontar a imagem quando a URL mudar
+                key={logo_url}
                 src={logo_url}
                 alt={nome_loja}
                 className="h-14 md:h-16 relative z-10 object-contain"
@@ -100,7 +100,20 @@ export const Header = ({ cartCount = 0, homeContent }) => {
             </div>
           </button>
 
-          {/* ... restante do código (mantido igual) ... */}
+          {/* MENU DESKTOP (ADICIONADO AQUI) */}
+          <nav className="hidden md:flex items-center gap-8">
+            {NAV_ITEMS.map((item, i) => (
+              <button
+                key={i}
+                onClick={item.to ? () => navigate(item.to) : item.action}
+                className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-zinc-400 hover:text-amber-500 transition-colors font-medium"
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* ÁREA DE ÍCONES (SEU CÓDIGO ORIGINAL MANTIDO) */}
           <div className="flex items-center gap-2 md:gap-3">
             <button
               onClick={() => navigate("/admin/login")}
@@ -139,31 +152,19 @@ export const Header = ({ cartCount = 0, homeContent }) => {
           </div>
         </div>
 
-        {/* MENU MOBILE */}
+        {/* MENU MOBILE (SEU CÓDIGO ORIGINAL MANTIDO) */}
         {mobileOpen && (
           <div className="md:hidden pb-6 pt-2 border-t border-zinc-800 animate-in slide-in-from-top duration-200">
             <nav className="space-y-1">
               {NAV_ITEMS.map((item, i) => (
-                item.to ? (
-                  <Link
-                    key={i}
-                    to={item.to}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between px-4 py-3 rounded-lg text-sm text-zinc-300 hover:bg-zinc-900 hover:text-amber-400 transition-all group"
-                  >
-                    <span className="uppercase tracking-widest text-xs">{item.label}</span>
-                    <ChevronRight size={16} className="text-zinc-600 group-hover:text-amber-400 transition-colors" />
-                  </Link>
-                ) : (
-                  <button
-                    key={i}
-                    onClick={item.action}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm text-zinc-300 hover:bg-zinc-900 hover:text-amber-400 transition-all group"
-                  >
-                    <span className="uppercase tracking-widest text-xs">{item.label}</span>
-                    <ChevronRight size={16} className="text-zinc-600 group-hover:text-amber-400 transition-colors" />
-                  </button>
-                )
+                <button
+                  key={i}
+                  onClick={item.to ? () => { navigate(item.to); setMobileOpen(false); } : item.action}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm text-zinc-300 hover:bg-zinc-900 hover:text-amber-400 transition-all group"
+                >
+                  <span className="uppercase tracking-widest text-xs">{item.label}</span>
+                  <ChevronRight size={16} className="text-zinc-600 group-hover:text-amber-400 transition-colors" />
+                </button>
               ))}
             </nav>
           </div>
