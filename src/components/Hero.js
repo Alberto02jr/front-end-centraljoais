@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Gem, ShieldCheck, Award, Sparkles, ChevronDown } from "lucide-react";
 
-/* ===== CONTEUDO INICIAL (FALLBACK) ===== */
+/* ===== CONTEUDO INICIAL (FALLBACKo) ===== */
 const CONTEUDO_INICIAL = {
   titulo: "Central Joias",
   texto: [
