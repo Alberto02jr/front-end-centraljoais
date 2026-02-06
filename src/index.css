@@ -1,0 +1,125 @@
+/* Importação de fontes externas do Google Fonts (Estilos: Cursiva, Moderna e Serifada) */
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap');
+
+/* Injeção das diretrizes básicas, componentes e utilitários do framework Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Configurações globais do corpo (body) da página */
+body {
+    margin: 0; /* Remove as margens padrão do navegador */
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #050505;
+    color: #F5F5F5;
+}
+
+/* Configuração de fonte para blocos de código (monospaçada) */
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Classe utilitária para usar a fonte cursiva 'Great Vibes' */
+.font-cursive {
+    font-family: 'Great Vibes', cursive;
+}
+
+/* Classe utilitária para usar a fonte serifada 'Playfair Display' */
+.font-serif {
+    font-family: 'Playfair Display', serif;
+}
+
+/* Classe para criar o efeito de texto com degradê dourado */
+.gold-gradient-text {
+    background: linear-gradient(to right, #D4AF37, #F3E5AB, #D4AF37);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================= */
+/* VARIÁVEIS DE TEMA TAILWIND */
+/* ========================= */
+@layer base {
+    :root {
+        --background: 0 0% 2%;
+        --foreground: 0 0% 96%;
+
+        --card: 0 0% 4%;
+        --card-foreground: 0 0% 96%;
+
+        --popover: 0 0% 4%;
+        --popover-foreground: 0 0% 96%;
+
+        --primary: 46 65% 52%;
+        --primary-foreground: 0 0% 0%;
+
+        --secondary: 0 0% 9%;
+        --secondary-foreground: 0 0% 96%;
+
+        --muted: 0 0% 9%;
+        --muted-foreground: 0 0% 60%;
+
+        --accent: 0 0% 9%;
+        --accent-foreground: 0 0% 96%;
+
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 96%;
+
+        --border: 46 65% 52%;
+        --input: 0 0% 14.9%;
+        --ring: 46 65% 52%;
+
+        --radius: 0.75rem;
+    }
+}
+
+/* ========================= */
+/* ANIMAÇÕES (EFEITOS VISUAIS) */
+/* ========================= */
+
+/* Flutuação forte (texto) */
+@keyframes floatStrong {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-25px); }
+    100% { transform: translateY(0); }
+}
+
+/* Flutuação da imagem */
+@keyframes floatImage {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-18px); }
+    100% { transform: translateY(0); }
+}
+
+/* Zoom suave ao abrir imagem */
+@keyframes zoomIn {
+    from {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ========================= */
+/* CLASSES UTILITÁRIAS */
+/* ========================= */
+
+.animate-float-strong {
+    animation: floatStrong 5s ease-in-out infinite;
+}
+
+.animate-float-image {
+    animation: floatImage 7s ease-in-out infinite;
+}
+
+.animate-zoom-in {
+    animation: zoomIn 0.3s ease-out;
+}
