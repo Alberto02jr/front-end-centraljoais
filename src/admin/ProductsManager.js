@@ -707,50 +707,42 @@ export function ProductsManager({ token }) {
           </div>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-  <DialogTrigger asChild>
-    <button 
-      style={styles.addBtn} 
-      onClick={() => setProduct(emptyProduct)}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(212,175,55,0.40), inset 0 1px 0 rgba(255,255,255,0.2)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = styles.addBtn.boxShadow; }}
-    >
-      <Plus size={16} strokeWidth={3} /> Novo Produto
-    </button>
-  </DialogTrigger>
+            <DialogTrigger asChild>
+              <button style={styles.addBtn} onClick={() => setProduct(emptyProduct)}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(212,175,55,0.40), inset 0 1px 0 rgba(255,255,255,0.2)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = styles.addBtn.boxShadow; }}
+              >
+                <Plus size={16} strokeWidth={3} /> Novo Produto
+              </button>
+            </DialogTrigger>
 
-  {/* O PORTAL É O QUE RESOLVE O PROBLEMA DE IR PARA BAIXO */}
-  <DialogPortal>
-    {/* O OVERLAY CRIA O FUNDO ESCURO ATRÁS DO PAINEL */}
-    <DialogOverlay className="fixed inset-0 bg-black/80 z-[100] backdrop-blur-sm" />
-    
-    <DialogContent 
-      {/* O SEGREDO ESTÁ NAS CLASSES 'fixed' E NO POSICIONAMENTO 50% */}
-      className="fixed left-[50%] top-[50%] z-[101] w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] p-0 border-none bg-transparent shadow-none outline-none [&>button]:hidden" 
-      style={{ background: 'none' }}
-    >
-      <div style={{ borderRadius: '20px', overflow: 'hidden', background: '#111113', border: '1px solid #27272a', boxShadow: '0 24px 80px rgba(0,0,0,0.60)' }}>
-        
-        {/* Modal Header */}
-        <div style={{ padding: '20px 28px', borderBottom: '1px solid #1e1e22', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #d4af37, #b8941e)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {product?.id ? <Edit size={16} color="#09090b" strokeWidth={2.5} /> : <Plus size={16} color="#09090b" strokeWidth={2.5} />}
-            </div>
-            <div>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: '#fafafa' }}>
-                {product?.id ? "Editar Produto" : "Novo Produto"}
-              </div>
-              <div style={{ fontSize: '11px', color: '#71717a', fontWeight: 500 }}>
-                Preencha os dados abaixo
-              </div>
-            </div>
-          </div>
-          <button onClick={() => setDialogOpen(false)} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #27272a', background: '#18181b', color: '#71717a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.15s' }}>
-            <X size={14} strokeWidth={2.5} />
-          </button>
-        </div>
+            <DialogContent className="w-full max-w-2xl p-0 border-none bg-transparent shadow-none outline-none [&>button]:hidden max-h-[90vh] overflow-hidden" style={{ background: 'none' }}>
+              <div style={{ borderRadius: '20px', overflow: 'hidden', background: '#111113', border: '1px solid #27272a', boxShadow: '0 24px 80px rgba(0,0,0,0.60)' }}>
+                {/* Modal Header */}
+                <div style={{ padding: '20px 28px', borderBottom: '1px solid #1e1e22', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #d4af37, #b8941e)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {product?.id ? <Edit size={16} color="#09090b" strokeWidth={2.5} /> : <Plus size={16} color="#09090b" strokeWidth={2.5} />}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#fafafa' }}>
+                        {product?.id ? "Editar Produto" : "Novo Produto"}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#71717a', fontWeight: 500 }}>
+                        Preencha os dados abaixo
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={() => setDialogOpen(false)} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #27272a', background: '#18181b', color: '#71717a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#fafafa'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a'; }}
+                  >
+                    <X size={14} strokeWidth={2.5} />
+                  </button>
+                </div>
 
-        {/* Modal Body */}
+                {/* Modal Body */}
+                <div style={styles.modalScroll}>
                   {product && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
@@ -1064,7 +1056,7 @@ export function ProductsManager({ token }) {
 
       {/* ─── MODAL DE ESPECIFICACOES ─── */}
       <Dialog open={!!specProduct} onOpenChange={() => setSpecProduct(null)}>
-        <DialogContent className="max-w-md p-0 border-none bg-transparent shadow-none outline-none [&>button]:hidden" style={{ background: 'none' }}>
+        <DialogContent className="max-w-md p-0 border-none bg-transparent shadow-none outline-none [&>button]:hidden max-h-[90vh] overflow-hidden" style={{ background: 'none' }}>
           <div style={{ borderRadius: '20px', overflow: 'hidden', background: '#111113', border: '1px solid #27272a', boxShadow: '0 24px 80px rgba(0,0,0,0.60)' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #1e1e22', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
