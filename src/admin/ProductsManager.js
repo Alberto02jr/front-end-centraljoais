@@ -4,7 +4,8 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { 
-  Plus, Trash2, Edit, Package, Tag, Loader2, Upload, Ruler, X, Percent, ShieldCheck, CreditCard
+  Plus, Trash2, Edit, Package, Tag, Loader2, Upload, Ruler, X, Percent, ShieldCheck, CreditCard,
+  Search, Eye, ChevronRight, ImageIcon, Sparkles, Box
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,6 @@ import {
 
 const API = "https://central-joias-backend.up.railway.app/api";
 
-
 const CATEGORIES = [
   { slug: "aliancas-prata-950", nome: "Alianças de Prata 950" },
   { slug: "aliancas-moeda-antiga", nome: "Alianças de Moeda Antiga" },
@@ -50,7 +50,6 @@ const CATEGORY_FIELDS = {
   "relogios": ["marca", "modelo", "tipo", "movimento"],
 };
 
-// Modificado para já iniciar com os campos novos
 const emptyProduct = {
   name: "",
   category: "",
@@ -65,6 +64,524 @@ const emptyProduct = {
   },
 };
 
+/* ─── inline styles ─── */
+const styles = {
+  page: {
+    minHeight: '100vh',
+    background: 'linear-gradient(165deg, #09090b 0%, #0c0c10 40%, #0f0f14 100%)',
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    color: '#fafafa',
+    padding: '0',
+    margin: '0',
+  },
+  topBar: {
+    position: 'sticky',
+    top: 0,
+    zIndex: 40,
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    background: 'rgba(9,9,11,0.80)',
+    borderBottom: '1px solid rgba(212,175,55,0.10)',
+  },
+  topBarInner: {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    padding: '16px 24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '16px',
+  },
+  logoArea: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  logoIcon: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '12px',
+    background: 'linear-gradient(135deg, #d4af37 0%, #b8941e 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 4px 16px rgba(212,175,55,0.25)',
+  },
+  logoText: {
+    fontSize: '18px',
+    fontWeight: 800,
+    letterSpacing: '-0.5px',
+    color: '#fafafa',
+  },
+  logoSub: {
+    fontSize: '11px',
+    fontWeight: 500,
+    color: '#71717a',
+    letterSpacing: '0.5px',
+    textTransform: 'uppercase',
+  },
+  statsRow: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
+  },
+  statChip: {
+    padding: '6px 14px',
+    borderRadius: '100px',
+    background: 'rgba(39,39,42,0.6)',
+    border: '1px solid rgba(63,63,70,0.5)',
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#a1a1aa',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    whiteSpace: 'nowrap',
+  },
+  statValue: {
+    color: '#fafafa',
+    fontWeight: 700,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  addBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 20px',
+    borderRadius: '10px',
+    border: 'none',
+    background: 'linear-gradient(135deg, #d4af37 0%, #c9a22e 100%)',
+    color: '#09090b',
+    fontSize: '13px',
+    fontWeight: 800,
+    letterSpacing: '0.3px',
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+    boxShadow: '0 4px 20px rgba(212,175,55,0.30), inset 0 1px 0 rgba(255,255,255,0.2)',
+    transition: 'all 0.2s ease',
+  },
+  content: {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    padding: '32px 24px 80px',
+  },
+  catSection: {
+    marginBottom: '48px',
+  },
+  catHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '20px',
+  },
+  catIcon: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
+    background: 'rgba(212,175,55,0.10)',
+    border: '1px solid rgba(212,175,55,0.20)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  catTitle: {
+    fontSize: '16px',
+    fontWeight: 700,
+    color: '#fafafa',
+    letterSpacing: '-0.3px',
+  },
+  catCount: {
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#71717a',
+    marginLeft: '4px',
+  },
+  grid: {
+    display: 'flex',
+    gap: '16px',
+    overflowX: 'auto',
+    paddingBottom: '16px',
+    scrollSnapType: 'x mandatory',
+    WebkitOverflowScrolling: 'touch',
+  },
+  productCard: {
+    minWidth: '220px',
+    maxWidth: '220px',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    background: '#18181b',
+    border: '1px solid #27272a',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    cursor: 'pointer',
+    scrollSnapAlign: 'start',
+    position: 'relative',
+  },
+  productCardHover: {
+    borderColor: 'rgba(212,175,55,0.40)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.40), 0 0 0 1px rgba(212,175,55,0.15)',
+    transform: 'translateY(-2px)',
+  },
+  cardImgWrap: {
+    position: 'relative',
+    height: '180px',
+    background: '#0f0f12',
+    overflow: 'hidden',
+  },
+  cardImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+  },
+  cardOverlay: {
+    position: 'absolute',
+    inset: 0,
+    background: 'linear-gradient(to top, rgba(9,9,11,0.95) 0%, rgba(9,9,11,0.3) 50%, transparent 100%)',
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingBottom: '14px',
+    gap: '8px',
+    opacity: 0,
+    transition: 'opacity 0.25s ease',
+  },
+  cardOverlayVisible: {
+    opacity: 1,
+  },
+  overlayBtn: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
+    border: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    fontSize: '0',
+  },
+  overlayBtnSpec: {
+    background: 'rgba(250,250,250,0.10)',
+    backdropFilter: 'blur(8px)',
+    color: '#fafafa',
+  },
+  overlayBtnEdit: {
+    background: '#d4af37',
+    color: '#09090b',
+    boxShadow: '0 4px 12px rgba(212,175,55,0.35)',
+  },
+  overlayBtnDel: {
+    background: 'rgba(239,68,68,0.85)',
+    color: '#fff',
+    boxShadow: '0 4px 12px rgba(239,68,68,0.30)',
+  },
+  cardBody: {
+    padding: '14px 16px 16px',
+  },
+  cardName: {
+    fontSize: '12px',
+    fontWeight: 700,
+    color: '#e4e4e7',
+    letterSpacing: '0.2px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    marginBottom: '8px',
+    textTransform: 'uppercase',
+  },
+  cardPriceRow: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: '8px',
+  },
+  priceOriginal: {
+    fontSize: '11px',
+    color: '#52525b',
+    textDecoration: 'line-through',
+    fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
+    fontWeight: 500,
+    lineHeight: 1,
+  },
+  pricePromo: {
+    fontSize: '16px',
+    fontWeight: 800,
+    color: '#34d399',
+    fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
+    lineHeight: 1,
+  },
+  priceNormal: {
+    fontSize: '16px',
+    fontWeight: 800,
+    color: '#d4af37',
+    fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
+    lineHeight: 1,
+  },
+  promoBadge: {
+    padding: '3px 8px',
+    borderRadius: '6px',
+    background: 'rgba(52,211,153,0.12)',
+    border: '1px solid rgba(52,211,153,0.25)',
+    color: '#34d399',
+    fontSize: '9px',
+    fontWeight: 800,
+    letterSpacing: '0.8px',
+    textTransform: 'uppercase',
+  },
+  /* ─── Dialog / Modal ─── */
+  modalOverlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(0,0,0,0.75)',
+    backdropFilter: 'blur(8px)',
+    zIndex: 50,
+  },
+  modalScroll: {
+    maxHeight: '88vh',
+    overflowY: 'auto',
+    padding: '28px',
+  },
+  sectionBlock: {
+    borderRadius: '14px',
+    background: '#18181b',
+    border: '1px solid #27272a',
+    padding: '20px',
+  },
+  sectionLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '10px',
+    fontWeight: 800,
+    letterSpacing: '1.2px',
+    textTransform: 'uppercase',
+    color: '#71717a',
+    marginBottom: '16px',
+  },
+  sectionLabelGold: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '10px',
+    fontWeight: 800,
+    letterSpacing: '1.2px',
+    textTransform: 'uppercase',
+    color: '#d4af37',
+    marginBottom: '16px',
+  },
+  fieldLabel: {
+    fontSize: '10px',
+    fontWeight: 700,
+    letterSpacing: '0.8px',
+    textTransform: 'uppercase',
+    color: '#71717a',
+    marginBottom: '6px',
+    display: 'block',
+  },
+  fieldInput: {
+    width: '100%',
+    height: '44px',
+    padding: '0 14px',
+    borderRadius: '10px',
+    border: '1.5px solid #27272a',
+    background: '#0f0f12',
+    color: '#fafafa',
+    fontSize: '14px',
+    fontWeight: 500,
+    outline: 'none',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+  },
+  priceInput: {
+    width: '100%',
+    height: '52px',
+    padding: '0 14px 0 44px',
+    borderRadius: '10px',
+    border: '1.5px solid #27272a',
+    background: '#0f0f12',
+    color: '#fafafa',
+    fontSize: '20px',
+    fontWeight: 700,
+    fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
+    outline: 'none',
+    transition: 'border-color 0.2s ease',
+  },
+  pricePrefix: {
+    position: 'absolute',
+    left: '14px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    fontSize: '14px',
+    fontWeight: 800,
+    color: '#d4af37',
+  },
+  promoActiveBox: {
+    borderRadius: '12px',
+    background: 'rgba(52,211,153,0.06)',
+    border: '1.5px solid rgba(52,211,153,0.25)',
+    padding: '16px',
+  },
+  promoLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '12px',
+  },
+  promoTag: {
+    fontSize: '10px',
+    fontWeight: 800,
+    letterSpacing: '1px',
+    textTransform: 'uppercase',
+    color: '#34d399',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+  },
+  removeBtn: {
+    padding: '4px 12px',
+    borderRadius: '8px',
+    border: '1px solid rgba(239,68,68,0.3)',
+    background: 'rgba(239,68,68,0.10)',
+    color: '#ef4444',
+    fontSize: '11px',
+    fontWeight: 700,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  activatePromoBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    width: '100%',
+    height: '52px',
+    borderRadius: '10px',
+    border: '1.5px dashed rgba(212,175,55,0.40)',
+    background: 'rgba(212,175,55,0.05)',
+    color: '#d4af37',
+    fontSize: '12px',
+    fontWeight: 800,
+    letterSpacing: '0.5px',
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  uploadArea: {
+    width: '100%',
+    borderRadius: '12px',
+    border: '2px dashed #27272a',
+    background: 'rgba(15,15,18,0.5)',
+    padding: '28px 20px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    gap: '8px',
+  },
+  uploadLabel: {
+    fontSize: '12px',
+    fontWeight: 700,
+    color: '#52525b',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  uploadHint: {
+    fontSize: '11px',
+    color: '#3f3f46',
+    fontWeight: 500,
+  },
+  previewBox: {
+    position: 'relative',
+    width: '100px',
+    height: '100px',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    border: '2px solid #d4af37',
+    flexShrink: 0,
+  },
+  previewImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  previewDel: {
+    position: 'absolute',
+    top: '-1px',
+    right: '-1px',
+    width: '24px',
+    height: '24px',
+    borderRadius: '0 10px 0 8px',
+    background: '#ef4444',
+    border: 'none',
+    color: '#fff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    transition: 'background 0.2s ease',
+  },
+  saveBtn: {
+    width: '100%',
+    height: '56px',
+    borderRadius: '14px',
+    border: 'none',
+    background: 'linear-gradient(135deg, #d4af37 0%, #c9a22e 100%)',
+    color: '#09090b',
+    fontSize: '15px',
+    fontWeight: 800,
+    letterSpacing: '0.5px',
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+    boxShadow: '0 6px 24px rgba(212,175,55,0.30), inset 0 1px 0 rgba(255,255,255,0.15)',
+    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+  },
+  /* ─── Spec Modal ─── */
+  specRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '10px 0',
+    borderBottom: '1px solid #1e1e22',
+  },
+  specKey: {
+    fontSize: '11px',
+    fontWeight: 700,
+    color: '#71717a',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  specVal: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: '#e4e4e7',
+  },
+  emptyState: {
+    textAlign: 'center',
+    padding: '80px 20px',
+  },
+  emptyIcon: {
+    width: '64px',
+    height: '64px',
+    borderRadius: '20px',
+    background: 'rgba(39,39,42,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 16px',
+  },
+  scrollbarHide: `
+    .scroll-hide::-webkit-scrollbar { display: none; }
+    .scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .focus-gold:focus { border-color: #d4af37 !important; box-shadow: 0 0 0 3px rgba(212,175,55,0.12) !important; }
+    .hover-gold:hover { border-color: rgba(212,175,55,0.40) !important; background: rgba(212,175,55,0.04) !important; }
+  `,
+};
+
 export function ProductsManager({ token }) {
   const [products, setProducts] = useState([]);
   const [product, setProduct] = useState(null);
@@ -72,6 +589,7 @@ export function ProductsManager({ token }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState(null);
 
   const headers = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
@@ -114,9 +632,8 @@ export function ProductsManager({ token }) {
 
   async function saveProduct() {
     if (!product.name || !product.category || !product.price) {
-        return toast.error("Preencha nome, categoria e preço!");
+      return toast.error("Preencha nome, categoria e preço!");
     }
-
     setSaving(true);
     try {
       const payload = {
@@ -124,13 +641,11 @@ export function ProductsManager({ token }) {
         price: parseFloat(product.price) || 0,
         promo_price: product.promo_active ? parseFloat(product.promo_price) : null,
       };
-
       if (product.id) {
         await axios.put(`${API}/products/${product.id}`, payload, { headers });
       } else {
         await axios.post(`${API}/products`, payload, { headers });
       }
-
       setDialogOpen(false);
       loadProducts();
       toast.success("Salvo com sucesso!");
@@ -144,11 +659,11 @@ export function ProductsManager({ token }) {
   async function deleteProduct(id) {
     if (!confirm("Tem certeza que deseja excluir esta joia?")) return;
     try {
-        await axios.delete(`${API}/products/${id}`, { headers });
-        toast.success("Produto removido!");
-        loadProducts();
+      await axios.delete(`${API}/products/${id}`, { headers });
+      toast.success("Produto removido!");
+      loadProducts();
     } catch {
-        toast.error("Erro ao deletar.");
+      toast.error("Erro ao deletar.");
     }
   }
 
@@ -157,270 +672,426 @@ export function ProductsManager({ token }) {
     return acc;
   }, {});
 
+  const totalProducts = products.length;
+  const promoCount = products.filter(p => p.promo_active).length;
+
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8 bg-zinc-950 min-h-screen font-sans">
-      <div className="flex justify-between items-center border-b border-zinc-800 pb-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
-          <Package className="text-amber-500" /> Painel de Inventário
-        </h1>
+    <div style={styles.page}>
+      <style>{styles.scrollbarHide}</style>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setProduct(emptyProduct)} className="bg-amber-500 hover:bg-amber-600 text-black font-black uppercase">
-              <Plus className="w-5 h-5 mr-2" /> Novo Produto
-            </Button>
-          </DialogTrigger>
-          
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 border-none bg-zinc-900">
-            <div className="bg-zinc-900 m-2 rounded-lg shadow-2xl overflow-hidden border-t-4 border-amber-500">
-              <div className="p-6 space-y-6">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
-                    {product?.id ? "Editar Joia" : "Cadastrar Nova Joia"}
-                  </DialogTitle>
-                </DialogHeader>
+      {/* ─── TOP BAR ─── */}
+      <div style={styles.topBar}>
+        <div style={styles.topBarInner}>
+          <div style={styles.logoArea}>
+            <div style={styles.logoIcon}>
+              <Package size={20} color="#09090b" strokeWidth={2.5} />
+            </div>
+            <div>
+              <div style={styles.logoText}>Inventario</div>
+              <div style={styles.logoSub}>Gerenciamento de Produtos</div>
+            </div>
+          </div>
 
-                {product && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label className="text-zinc-300 font-bold uppercase text-xs">Nome da Peca</Label>
-                        <Input 
-                          className="bg-zinc-800 border-2 border-zinc-700 text-white focus:border-amber-500 h-10 font-medium"
-                          value={product.name} 
-                          onChange={e => setProduct(prev => ({...prev, name: e.target.value}))} 
-                        />
+          <div style={styles.statsRow}>
+            <div style={styles.statChip}>
+              <Box size={13} />
+              <span style={styles.statValue}>{totalProducts}</span> produtos
+            </div>
+            {promoCount > 0 && (
+              <div style={{...styles.statChip, borderColor: 'rgba(52,211,153,0.25)', background: 'rgba(52,211,153,0.06)'}}>
+                <Sparkles size={13} color="#34d399" />
+                <span style={{...styles.statValue, color: '#34d399'}}>{promoCount}</span> 
+                <span style={{color: '#34d399'}}>em oferta</span>
+              </div>
+            )}
+          </div>
+
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <button style={styles.addBtn} onClick={() => setProduct(emptyProduct)}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(212,175,55,0.40), inset 0 1px 0 rgba(255,255,255,0.2)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = styles.addBtn.boxShadow; }}
+              >
+                <Plus size={16} strokeWidth={3} /> Novo Produto
+              </button>
+            </DialogTrigger>
+
+            <DialogContent className="w-full max-w-2xl p-0 border-none bg-transparent shadow-none outline-none [&>button]:hidden" style={{ background: 'none' }}>
+              <div style={{ borderRadius: '20px', overflow: 'hidden', background: '#111113', border: '1px solid #27272a', boxShadow: '0 24px 80px rgba(0,0,0,0.60)' }}>
+                {/* Modal Header */}
+                <div style={{ padding: '20px 28px', borderBottom: '1px solid #1e1e22', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #d4af37, #b8941e)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {product?.id ? <Edit size={16} color="#09090b" strokeWidth={2.5} /> : <Plus size={16} color="#09090b" strokeWidth={2.5} />}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#fafafa' }}>
+                        {product?.id ? "Editar Produto" : "Novo Produto"}
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-zinc-300 font-bold uppercase text-xs">Categoria</Label>
-                        <Select 
-                          value={product.category} 
-                          onValueChange={val => setProduct(prev => ({
-                            ...prev, 
-                            category: val, 
-                            specifications: { 
-                              ...prev.specifications
-                            }
-                          }))}
-                        >
-                          <SelectTrigger className="bg-zinc-800 border-2 border-zinc-700 text-white h-10">
-                            <SelectValue placeholder="Escolha a categoria" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-zinc-900 border-2 border-amber-500">
-                            {CATEGORIES.map(c => (
-                              <SelectItem key={c.slug} value={c.slug} className="text-white focus:bg-amber-500 focus:text-black font-bold py-3 border-b border-zinc-800 last:border-0">
-                                {c.nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <div style={{ fontSize: '11px', color: '#71717a', fontWeight: 500 }}>
+                        Preencha os dados abaixo
                       </div>
                     </div>
+                  </div>
+                  <button onClick={() => setDialogOpen(false)} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #27272a', background: '#18181b', color: '#71717a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#fafafa'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a'; }}
+                  >
+                    <X size={14} strokeWidth={2.5} />
+                  </button>
+                </div>
 
-                    <div className="p-5 rounded-xl bg-zinc-800 shadow-2xl border-l-4 border-amber-500">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label className="text-zinc-400 font-bold text-[10px] uppercase">Preco Normal (R$)</Label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-3 text-amber-500 font-bold">R$</span>
-                            <Input 
-                              type="number" 
-                              className="bg-zinc-900 border-zinc-700 text-white font-mono text-xl focus:border-amber-500 h-12 pl-10"
-                              placeholder="0,00"
-                              value={product.price} 
-                              onChange={e => setProduct(prev => ({...prev, price: e.target.value}))} 
+                {/* Modal Body */}
+                <div style={styles.modalScroll}>
+                  {product && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                      {/* Nome + Categoria */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div>
+                          <label style={styles.fieldLabel}>Nome da Peca</label>
+                          <input
+                            className="focus-gold"
+                            style={styles.fieldInput}
+                            value={product.name}
+                            onChange={e => setProduct(prev => ({...prev, name: e.target.value}))}
+                            placeholder="Ex: Alianca Diamantada"
+                          />
+                        </div>
+                        <div>
+                          <label style={styles.fieldLabel}>Categoria</label>
+                          <Select
+                            value={product.category}
+                            onValueChange={val => setProduct(prev => ({
+                              ...prev,
+                              category: val,
+                              specifications: { ...prev.specifications }
+                            }))}
+                          >
+                            <SelectTrigger className="h-[44px] rounded-[10px] border-[1.5px] border-[#27272a] bg-[#0f0f12] text-[#fafafa] text-sm font-medium focus:border-[#d4af37] focus:ring-0 focus:ring-offset-0">
+                              <SelectValue placeholder="Escolha a categoria" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#18181b] border-[#27272a] rounded-[12px]">
+                              {CATEGORIES.map(c => (
+                                <SelectItem key={c.slug} value={c.slug} className="text-[#e4e4e7] focus:bg-[#d4af37] focus:text-[#09090b] font-semibold py-3 rounded-lg">
+                                  {c.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      {/* Precos */}
+                      <div style={styles.sectionBlock}>
+                        <div style={styles.sectionLabelGold}>
+                          <CreditCard size={13} /> Precificacao
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                          <div>
+                            <label style={styles.fieldLabel}>Preco Normal</label>
+                            <div style={{ position: 'relative' }}>
+                              <span style={styles.pricePrefix}>R$</span>
+                              <input
+                                type="number"
+                                className="focus-gold"
+                                style={styles.priceInput}
+                                placeholder="0,00"
+                                value={product.price}
+                                onChange={e => setProduct(prev => ({...prev, price: e.target.value}))}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label style={styles.fieldLabel}>Promocao</label>
+                            {!product.promo_active ? (
+                              <button
+                                type="button"
+                                style={styles.activatePromoBtn}
+                                onClick={() => setProduct(prev => ({ ...prev, promo_active: true }))}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.60)'; e.currentTarget.style.background = 'rgba(212,175,55,0.08)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.40)'; e.currentTarget.style.background = 'rgba(212,175,55,0.05)'; }}
+                              >
+                                <Percent size={14} /> Ativar Promocao
+                              </button>
+                            ) : (
+                              <div style={styles.promoActiveBox}>
+                                <div style={styles.promoLabel}>
+                                  <span style={styles.promoTag}>
+                                    <Sparkles size={12} /> Promo Ativa
+                                  </span>
+                                  <button
+                                    style={styles.removeBtn}
+                                    onClick={() => setProduct(prev => ({ ...prev, promo_active: false, promo_price: "" }))}
+                                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.20)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.10)'; }}
+                                  >
+                                    Remover
+                                  </button>
+                                </div>
+                                <div style={{ position: 'relative' }}>
+                                  <span style={{...styles.pricePrefix, color: '#34d399'}}>R$</span>
+                                  <input
+                                    type="number"
+                                    className="focus-gold"
+                                    style={{...styles.priceInput, borderColor: 'rgba(52,211,153,0.3)'}}
+                                    placeholder="0,00"
+                                    value={product.promo_price}
+                                    onChange={e => setProduct(prev => ({ ...prev, promo_price: e.target.value }))}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Garantia e Parcelamento */}
+                      <div style={styles.sectionBlock}>
+                        <div style={styles.sectionLabelGold}>
+                          <ShieldCheck size={13} /> Condicoes de Venda
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                          <div>
+                            <label style={styles.fieldLabel}>Garantia</label>
+                            <input
+                              className="focus-gold"
+                              style={styles.fieldInput}
+                              placeholder="Ex: Vitalicia"
+                              value={product.specifications?.garantia || ""}
+                              onChange={e => updateSpec("garantia", e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label style={styles.fieldLabel}>Parcelamento</label>
+                            <input
+                              className="focus-gold"
+                              style={styles.fieldInput}
+                              placeholder="Ex: 10x sem juros"
+                              value={product.specifications?.parcelamento || ""}
+                              onChange={e => updateSpec("parcelamento", e.target.value)}
                             />
                           </div>
                         </div>
+                      </div>
 
-                        <div className="space-y-3">
-                          {!product.promo_active ? (
-                            <Button
-                              type="button"
-                              onClick={() => setProduct(prev => ({ ...prev, promo_active: true }))}
-                              className="w-full h-12 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-black uppercase tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
-                            >
-                              <Percent className="w-5 h-5" /> Ativar Promocao
-                            </Button>
-                          ) : (
-                            <div className="p-4 rounded-xl bg-emerald-500/10 border-2 border-emerald-500 space-y-3">
-                              <div className="flex items-center justify-between">
-                                <span className="text-emerald-400 font-black uppercase text-xs tracking-widest">Promocao Ativa</span>
-                                <Button
-                                  size="sm"
-                                  className="bg-red-500 hover:bg-red-600 text-white"
-                                  onClick={() => setProduct(prev => ({ ...prev, promo_active: false, promo_price: "" }))}
-                                >
-                                  Remover
-                                </Button>
-                              </div>
-                              <div className="relative">
-                                <span className="absolute left-3 top-3 text-emerald-400 font-black">R$</span>
-                                <Input
-                                  type="number"
-                                  placeholder="Valor promocional"
-                                  className="h-14 pl-10 text-xl font-mono bg-zinc-900 border-emerald-500 text-white"
-                                  value={product.promo_price}
-                                  onChange={e => setProduct(prev => ({ ...prev, promo_price: e.target.value }))}
+                      {/* Detalhes Tecnicos */}
+                      {product.category && (
+                        <div style={styles.sectionBlock}>
+                          <div style={styles.sectionLabel}>
+                            <Ruler size={13} /> Detalhes Tecnicos
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                            {CATEGORY_FIELDS[product.category]?.map(field => (
+                              <div key={field}>
+                                <label style={styles.fieldLabel}>{field}</label>
+                                <input
+                                  className="focus-gold"
+                                  style={{...styles.fieldInput, height: '40px', fontSize: '13px'}}
+                                  value={product.specifications?.[field] || ""}
+                                  onChange={e => updateSpec(field, e.target.value)}
                                 />
                               </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Upload Imagem */}
+                      <div>
+                        <label style={{...styles.fieldLabel, marginBottom: '12px'}}>Imagem do Produto</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <label
+                            className="hover-gold"
+                            style={styles.uploadArea}
+                          >
+                            {uploading ? (
+                              <Loader2 size={28} color="#d4af37" style={{ animation: 'spin 1s linear infinite' }} />
+                            ) : (
+                              <ImageIcon size={28} color="#3f3f46" />
+                            )}
+                            <span style={styles.uploadLabel}>
+                              {uploading ? 'Enviando...' : 'Enviar Foto'}
+                            </span>
+                            <span style={styles.uploadHint}>JPG, PNG ou WEBP</span>
+                            <input type="file" style={{ display: 'none' }} accept="image/*" onChange={handleUpload} disabled={uploading} />
+                          </label>
+                          {product.images?.[0] && (
+                            <div style={styles.previewBox}>
+                              <img src={product.images[0] || "/placeholder.svg"} style={styles.previewImg} alt="Preview" />
+                              <button
+                                onClick={() => setProduct(prev => ({...prev, images: []}))}
+                                style={styles.previewDel}
+                                onMouseEnter={e => { e.currentTarget.style.background = '#dc2626'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = '#ef4444'; }}
+                              >
+                                <X size={12} strokeWidth={3} />
+                              </button>
                             </div>
                           )}
                         </div>
                       </div>
-                    </div>
 
-                    {/* --- Garantia e Parcelamento --- */}
-                    <div className="p-4 rounded-xl bg-amber-500/10 border-2 border-amber-500/30 grid grid-cols-2 gap-4">
-                      <div className="col-span-2 flex items-center gap-2 text-amber-400 font-black text-xs uppercase">
-                        <ShieldCheck className="w-4 h-4" /> Condicoes de Venda
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-black text-zinc-400 uppercase">Garantia</Label>
-                        <Input 
-                          placeholder="Ex: Vitalicia"
-                          className="h-9 bg-zinc-800 border-zinc-700 text-white focus:border-amber-500"
-                          value={product.specifications?.garantia || ""}
-                          onChange={e => updateSpec("garantia", e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-black text-zinc-400 uppercase">Parcelamento</Label>
-                        <Input 
-                          placeholder="Ex: 10x sem juros"
-                          className="h-9 bg-zinc-800 border-zinc-700 text-white focus:border-amber-500"
-                          value={product.specifications?.parcelamento || ""}
-                          onChange={e => updateSpec("parcelamento", e.target.value)}
-                        />
-                      </div>
+                      {/* Salvar */}
+                      <button
+                        onClick={saveProduct}
+                        disabled={saving || uploading}
+                        style={{
+                          ...styles.saveBtn,
+                          opacity: (saving || uploading) ? 0.6 : 1,
+                          cursor: (saving || uploading) ? 'not-allowed' : 'pointer',
+                        }}
+                        onMouseEnter={e => { if (!saving && !uploading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(212,175,55,0.40), inset 0 1px 0 rgba(255,255,255,0.15)'; }}}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = styles.saveBtn.boxShadow; }}
+                      >
+                        {saving ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : 'Salvar no Estoque'}
+                      </button>
                     </div>
+                  )}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
 
-                    {product.category && (
-                      <div className="p-4 rounded-lg bg-zinc-800 border-2 border-zinc-700 grid grid-cols-2 gap-4">
-                        <div className="col-span-2 flex items-center gap-2 text-zinc-400 font-black text-xs uppercase">
-                          <Ruler className="w-4 h-4" /> Detalhes Tecnicos
-                        </div>
-                        {CATEGORY_FIELDS[product.category]?.map(field => (
-                          <div key={field} className="space-y-1">
-                            <Label className="text-[10px] font-black text-zinc-500 uppercase">{field}</Label>
-                            <Input 
-                              className="h-9 bg-zinc-900 border-zinc-700 text-white focus:border-amber-500"
-                              value={product.specifications?.[field] || ""}
-                              onChange={e => updateSpec(field, e.target.value)}
-                            />
-                          </div>
-                        ))}
+      {/* ─── CONTENT ─── */}
+      <div style={styles.content}>
+        {Object.keys(grouped).length === 0 && (
+          <div style={styles.emptyState}>
+            <div style={styles.emptyIcon}>
+              <Package size={28} color="#3f3f46" />
+            </div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>
+              Nenhum produto cadastrado
+            </div>
+            <div style={{ fontSize: '13px', color: '#3f3f46' }}>
+              Clique em "Novo Produto" para comecar
+            </div>
+          </div>
+        )}
+
+        {Object.entries(grouped).map(([catSlug, items]) => (
+          <div key={catSlug} style={styles.catSection}>
+            <div style={styles.catHeader}>
+              <div style={styles.catIcon}>
+                <Tag size={16} color="#d4af37" />
+              </div>
+              <span style={styles.catTitle}>
+                {CATEGORIES.find(c => c.slug === catSlug)?.nome || catSlug}
+              </span>
+              <span style={styles.catCount}>({items.length})</span>
+            </div>
+
+            <div className="scroll-hide" style={styles.grid}>
+              {items.map(p => (
+                <div
+                  key={p.id}
+                  style={{
+                    ...styles.productCard,
+                    ...(hoveredCard === p.id ? styles.productCardHover : {}),
+                  }}
+                  onMouseEnter={() => setHoveredCard(p.id)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                >
+                  <div style={styles.cardImgWrap}>
+                    <img
+                      src={p.images?.[0] || "/placeholder.svg"}
+                      style={{
+                        ...styles.cardImg,
+                        transform: hoveredCard === p.id ? 'scale(1.08)' : 'scale(1)',
+                      }}
+                      alt={p.name}
+                    />
+                    <div style={{
+                      ...styles.cardOverlay,
+                      ...(hoveredCard === p.id ? styles.cardOverlayVisible : {}),
+                    }}>
+                      <button style={{...styles.overlayBtn, ...styles.overlayBtnSpec}} onClick={() => setSpecProduct(p)}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(250,250,250,0.20)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(250,250,250,0.10)'; }}
+                      >
+                        <Ruler size={15} />
+                      </button>
+                      <button style={{...styles.overlayBtn, ...styles.overlayBtnEdit}} onClick={() => { setProduct(p); setDialogOpen(true); }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                      >
+                        <Edit size={15} />
+                      </button>
+                      <button style={{...styles.overlayBtn, ...styles.overlayBtnDel}} onClick={() => deleteProduct(p.id)}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#dc2626'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.85)'; }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                    {p.promo_active && (
+                      <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+                        <span style={styles.promoBadge}>Oferta</span>
                       </div>
                     )}
-
-                    <div className="space-y-2 border-t border-zinc-700 pt-4">
-                      <Label className="text-zinc-300 font-bold text-xs uppercase">Imagem da Joia</Label>
-                      <div className="flex items-center gap-4">
-                        <label className="flex-1 border-2 border-dashed border-zinc-600 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-amber-500 hover:bg-amber-500/10 transition-all bg-zinc-800 group">
-                          {uploading ? <Loader2 className="animate-spin text-amber-500" /> : <Upload className="w-8 h-8 text-zinc-500 group-hover:text-amber-500 mb-2" />}
-                          <span className="text-xs font-black text-zinc-400 group-hover:text-amber-400 uppercase">Enviar Foto</span>
-                          <input type="file" className="hidden" accept="image/*" onChange={handleUpload} disabled={uploading} />
-                        </label>
-                        {product.images?.[0] && (
-                          <div className="relative h-28 w-28 rounded-lg border-2 border-amber-500 p-1 bg-zinc-800 shadow-xl">
-                            <img src={product.images[0]} className="w-full h-full object-cover rounded shadow-md" alt="Preview" />
-                            <button onClick={() => setProduct(prev => ({...prev, images: []}))} className="absolute -top-3 -right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg transition-colors">
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
+                  </div>
+                  <div style={styles.cardBody}>
+                    <div style={styles.cardName}>{p.name}</div>
+                    <div style={styles.cardPriceRow}>
+                      <div>
+                        {p.promo_active ? (
+                          <>
+                            <div style={styles.priceOriginal}>R$ {Number(p.price).toFixed(2)}</div>
+                            <div style={styles.pricePromo}>R$ {Number(p.promo_price).toFixed(2)}</div>
+                          </>
+                        ) : (
+                          <div style={styles.priceNormal}>R$ {Number(p.price).toFixed(2)}</div>
                         )}
                       </div>
                     </div>
-
-                    <Button 
-                      onClick={saveProduct} 
-                      disabled={saving || uploading} 
-                      className="w-full h-14 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-black text-xl shadow-xl shadow-amber-500/20 uppercase border-b-4 border-amber-600"
-                    >
-                      {saving ? <Loader2 className="animate-spin h-6 w-6" /> : "Salvar no Estoque"}
-                    </Button>
                   </div>
-                )}
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="space-y-12 pb-20">
-        {Object.entries(grouped).map(([catSlug, items]) => (
-          <div key={catSlug} className="space-y-4">
-            <h2 className="text-xl font-black text-white border-b-4 border-amber-500 inline-block pr-8 pb-1 flex items-center gap-2 uppercase tracking-tighter">
-              <Tag className="text-amber-500 w-5 h-5" />
-              {CATEGORIES.find(c => c.slug === catSlug)?.nome || catSlug}
-            </h2>
-            <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide pt-2">
-              {items.map(p => (
-                <Card key={p.id} className="min-w-[210px] max-w-[210px] overflow-hidden group border-2 border-zinc-800 hover:border-amber-500/50 transition-all shadow-md bg-zinc-900">
-                  <div className="relative h-44 bg-zinc-800">
-                    <img src={p.images?.[0] || "/placeholder.svg"} className="h-full w-full object-cover" alt={p.name} />
-                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3 transition-opacity">
-                      <Button size="icon" className="rounded-full bg-zinc-700 hover:bg-zinc-600 text-white border border-zinc-600" onClick={() => setSpecProduct(p)}>
-                        <Ruler className="w-4 h-4" />
-                      </Button>
-                      <Button size="icon" className="bg-amber-500 hover:bg-amber-400 text-zinc-900 rounded-full shadow-lg shadow-amber-500/20" onClick={() => { setProduct(p); setDialogOpen(true); }}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button size="icon" className="rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20" onClick={() => deleteProduct(p.id)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-zinc-900">
-                    <p className="text-[11px] font-bold text-white truncate uppercase">{p.name}</p>
-                    <div className="flex items-center justify-between mt-1">
-                        <div className="flex flex-col">
-                          {p.promo_active ? (
-                            <>
-                              <span className="text-[10px] text-zinc-500 line-through font-mono">R$ {Number(p.price).toFixed(2)}</span>
-                              <span className="text-sm font-black text-emerald-400 font-mono">R$ {Number(p.promo_price).toFixed(2)}</span>
-                            </>
-                          ) : (
-                            <span className="text-sm font-black text-amber-400 font-mono">R$ {Number(p.price).toFixed(2)}</span>
-                          )}
-                        </div>
-                        {p.promo_active && <Badge className="bg-emerald-500 text-[9px] h-4 border-none text-white">OFERTA</Badge>}
-                    </div>
-                  </div>
-                </Card>
+                </div>
               ))}
             </div>
           </div>
         ))}
       </div>
 
-      {/* MODAL DE ESPECIFICACOES */}
+      {/* ─── MODAL DE ESPECIFICACOES ─── */}
       <Dialog open={!!specProduct} onOpenChange={() => setSpecProduct(null)}>
-        <DialogContent className="max-w-md bg-zinc-900 border border-zinc-700">
-          <DialogHeader>
-            <DialogTitle className="font-black uppercase text-white flex items-center gap-2">
-              <Ruler className="w-5 h-5 text-amber-500" /> Especificacoes
-            </DialogTitle>
-          </DialogHeader>
-          {specProduct && (
-            <div className="space-y-4">
-              <p className="font-bold text-amber-400">{specProduct.name}</p>
-              <div className="border border-zinc-700 rounded-lg p-3 bg-zinc-800 space-y-1">
-                {specProduct.specifications && Object.keys(specProduct.specifications).length > 0 ? (
-                  Object.entries(specProduct.specifications).map(([key, value]) => (
-                    <div key={key} className="flex justify-between text-xs border-b border-zinc-700 last:border-0 py-2">
-                      <span className="font-bold uppercase text-zinc-400">{key}</span>
-                      <span className="text-white font-medium">{value}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs italic text-zinc-500">Nenhuma especificacao cadastrada</p>
-                )}
+        <DialogContent className="max-w-md p-0 border-none bg-transparent shadow-none outline-none [&>button]:hidden" style={{ background: 'none' }}>
+          <div style={{ borderRadius: '20px', overflow: 'hidden', background: '#111113', border: '1px solid #27272a', boxShadow: '0 24px 80px rgba(0,0,0,0.60)' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #1e1e22', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Ruler size={16} color="#d4af37" />
+              </div>
+              <div>
+                <div style={{ fontSize: '15px', fontWeight: 700, color: '#fafafa' }}>Especificacoes</div>
+                <div style={{ fontSize: '11px', color: '#71717a', fontWeight: 500 }}>Detalhes tecnicos do produto</div>
               </div>
             </div>
-          )}
+            {specProduct && (
+              <div style={{ padding: '20px 24px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: '#d4af37', marginBottom: '16px' }}>{specProduct.name}</div>
+                <div style={{ borderRadius: '12px', background: '#18181b', border: '1px solid #27272a', padding: '4px 16px' }}>
+                  {specProduct.specifications && Object.keys(specProduct.specifications).length > 0 ? (
+                    Object.entries(specProduct.specifications).map(([key, value], i, arr) => (
+                      <div key={key} style={{...styles.specRow, borderBottom: i === arr.length - 1 ? 'none' : styles.specRow.borderBottom}}>
+                        <span style={styles.specKey}>{key}</span>
+                        <span style={styles.specVal}>{value}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ padding: '20px 0', textAlign: 'center' }}>
+                      <span style={{ fontSize: '12px', color: '#52525b', fontStyle: 'italic' }}>Nenhuma especificacao cadastrada</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
+
+      {/* Spin keyframes */}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
